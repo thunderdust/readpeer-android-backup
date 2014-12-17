@@ -1,0 +1,106 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_weight="1"
+    android:background="@drawable/bg_library"
+    android:orientation="vertical"
+    tools:context=".LogInActivity" >
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.15" >
+    </View>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.45"
+        android:background="#CCFFFFFF"
+        android:orientation="vertical"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:paddingBottom="30dp"
+        android:paddingTop="20dp" >
+        <ImageView
+            android:id="@+id/readpeer_branding"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:layout_marginTop="20dp"
+            android:src="@drawable/readpeer_branding" />
+        <EditText
+            android:id="@+id/et_username"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/backwithborder"
+            android:ems="10"
+            android:hint="@string/username_hint"
+            android:padding="3dp"
+            android:shadowColor="#000000" />
+        <requestFocus />
+        <EditText
+            android:id="@+id/et_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/backwithborder"
+            android:ems="10"
+            android:hint="@string/password_hint"
+            android:padding="3dp"
+            android:shadowColor="#000000" >
+        </EditText>
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:orientation="vertical" >
+            <CheckBox
+                android:id="@+id/checkBox_remberPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Remember Password"
+                android:textSize="12sp" />
+            <CheckBox
+                android:id="@+id/checkBox_autoLogin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Auto Login"
+                android:textSize="12sp" />
+        </LinearLayout>
+        <Button
+            android:id="@+id/btn_login"
+            android:layout_width="fill_parent"
+            android:layout_height="40dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/shape_button"
+            android:text="@string/log_in"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp" />
+        <TextView
+            android:id="@+id/tv_register"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="25dp"
+            android:background="@null"
+            android:gravity="center"
+            android:text="@string/register"
+            android:textColor="#000000"
+            android:textSize="12dp" />
+    </LinearLayout>
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.4" >
+    </View>
+</LinearLayout>

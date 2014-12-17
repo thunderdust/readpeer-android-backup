@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    <TextView
+        android:id="@+id/text_from_gallery"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="2dp"
+        android:background="#32CD32"
+        android:drawableLeft="@drawable/icon_choose_from_album"
+        android:ems="16"
+        android:padding="10dp"
+        android:text="  Choose from gallery"
+        android:textColor="#ffffff"
+        android:textStyle="bold" 
+        android:focusable="true">
+    </TextView>
+    <TextView
+        android:id="@+id/text_record_video"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#32CD32"
+        android:drawableLeft="@drawable/icon_image"
+        android:ems="16"
+        android:padding="10dp"
+        android:text="  Record a video"
+        android:textColor="#ffffff"
+        android:textStyle="bold" 
+        android:focusable="true"> 
+    </TextView>
+</LinearLayout>

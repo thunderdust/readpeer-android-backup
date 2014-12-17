@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/titlebar_big" >
+    <Button
+        android:id="@+id/btn_function"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:layout_marginLeft="5dip"
+        android:background="@android:color/transparent"
+        android:paddingLeft="1dp"
+        android:paddingRight="1dp"
+        android:textColor="#ffffff"
+        android:textSize="15sp" />
+    <EditText
+        android:id="@+id/EditText_bookshelf_name"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@null"
+        android:gravity="center"
+        android:inputType="@null"
+        android:textColor="#ffffff"
+        android:textSize="20sp" />
+    <Button
+        android:id="@+id/btn_myAccount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="5dip"
+        android:background="@android:color/transparent"
+        android:paddingLeft="3dp"
+        android:paddingRight="3dp"
+        android:textColor="#ffffff"
+        android:textSize="15sp" />
+</LinearLayout>

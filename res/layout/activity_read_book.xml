@@ -1,0 +1,35 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/readViewParent"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    tools:context=".ReadBookActivity" >
+    <socialatwork.readpeer.ObservableScrollView
+        android:id="@+id/scroller"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+        <socialatwork.readpeer.ReadView
+            android:id="@+id/readview"
+            android:layout_width="600dp"
+            android:layout_height="800dp"
+            android:hardwareAccelerated="false"
+            android:padding="10dp"
+            android:singleLine="false"
+            android:textIsSelectable="true" />
+    </socialatwork.readpeer.ObservableScrollView>
+    <FrameLayout
+        android:id="@+id/annotationFragmentContainer"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom" >
+    </FrameLayout>
+    <ImageView
+        android:id="@+id/imageview_busy"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:contentDescription="@string/desc"
+        android:src="@drawable/busy"
+        android:visibility="invisible" >
+    </ImageView>
+</FrameLayout>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+        <SeekBar
+            android:id="@+id/font_dialog_seekbar"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp" >
+        </SeekBar>
+        <Button
+            android:id="@+id/font_dialog_confirm"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/font_dialog_cancel"
+            android:layout_alignBottom="@+id/font_dialog_cancel"
+            android:layout_toLeftOf="@+id/font_dialog_cancel"
+            android:text="@string/OK" />
+        <Button
+            android:id="@+id/font_dialog_cancel"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_alignRight="@+id/font_dialog_seekbar"
+            android:layout_below="@+id/font_dialog_seekbar"
+            android:text="@string/cancel" />
+        <TextView
+            android:id="@+id/font_size_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/font_dialog_confirm"
+            android:layout_alignBottom="@+id/font_dialog_confirm"
+            android:layout_alignLeft="@+id/font_dialog_seekbar"
+            android:background="@null"
+            android:ems="15"
+            android:focusable="false"
+            android:textIsSelectable="false" />
+    </RelativeLayout>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:background="#E0EEE0" >
+        <ImageButton
+            android:id="@+id/btn_read_mode_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/desc"
+            android:src="@drawable/btn_read_mode_1" >
+        </ImageButton>
+        <ImageButton
+            android:id="@+id/btn_read_mode_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/desc"
+            android:src="@drawable/btn_read_mode_2" >
+        </ImageButton>
+        <ImageButton
+            android:id="@+id/btn_read_mode_3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/desc"
+            android:src="@drawable/btn_read_mode_3" >
+        </ImageButton>
+        <ImageButton
+            android:id="@+id/btn_read_mode_4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/desc"
+            android:src="@drawable/btn_read_mode_4" >
+        </ImageButton>
+    </LinearLayout>
+</LinearLayout>

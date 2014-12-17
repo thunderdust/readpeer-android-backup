@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+        <SeekBar
+            android:id="@+id/page_jump_seekbar"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_margin="10dp"
+            android:layout_weight="1" >
+        </SeekBar>
+        <TextView
+            android:id="@+id/text_page_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_margin="10dp"
+            android:textSize="13sp" >
+        </TextView>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ADD8E6"
+        android:orientation="horizontal" >
+        <ImageButton
+            android:id="@+id/btn_page_backone"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:background="@null"
+            android:src="@drawable/btn_previous" >
+        </ImageButton>
+        <Button
+            android:id="@+id/btn_jump_to"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:background="#32CD32"
+            android:ems="15"
+            android:padding="10dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:text="Go"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" >
+        </Button>
+        <ImageButton
+            android:id="@+id/btn_page_nextone"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:background="@null"
+            android:src="@drawable/btn_next" >
+        </ImageButton>
+    </LinearLayout>
+</LinearLayout>

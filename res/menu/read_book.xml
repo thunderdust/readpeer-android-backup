@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item
+        android:id="@+id/show_annotation"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:title="@string/show_annotation" android:icon="@drawable/btn_show_annotation"/>
+    <item android:id="@+id/font_change" 
+          android:title="@string/change_font" 
+          android:showAsAction="always"
+          android:icon="@drawable/btn_change_font_white"></item>
+    <item android:id="@+id/text_jump" android:title="@string/text_jump" android:showAsAction="never"></item>
+    <item android:id="@+id/search_text" android:title="@string/search_text" android:showAsAction="never"></item>
+</menu>

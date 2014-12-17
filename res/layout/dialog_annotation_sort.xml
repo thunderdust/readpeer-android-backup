@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="240dp"
+    android:layout_height="250dp"
+    android:background="#000000"
+    android:orientation="vertical"
+    android:weightSum="4" >
+    <Button
+        android:id="@+id/sort_bytime_earliest"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:layout_weight="1"
+        android:background="#4F4F4F"
+        android:padding="10dp"
+        android:text="Earliest in front"
+        android:textColor="#32CD32"
+        android:textSize="16sp"
+        android:textStyle="bold" >
+    </Button>
+    <Button
+        android:id="@+id/sort_bytime_latest"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:layout_weight="1"
+        android:background="#4F4F4F"
+        android:padding="10dp"
+        android:text="Latest in front"
+        android:textColor="#32CD32"
+        android:textSize="16sp"
+        android:textStyle="bold" >
+    </Button>
+    <Button
+        android:id="@+id/sort_by_comments"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:layout_weight="1"
+        android:background="#4F4F4F"
+        android:padding="10dp"
+        android:text="By comments count"
+        android:textColor="#32CD32"
+        android:textSize="16sp"
+        android:textStyle="bold" >
+    </Button>
+    <Button
+        android:id="@+id/sort_by_likes"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_margin="1dp"
+        android:layout_weight="1"
+        android:background="#4F4F4F"
+        android:padding="10dp"
+        android:text="By likes count"
+        android:textColor="#32CD32"
+        android:textSize="16sp"
+        android:textStyle="bold" >
+    </Button>
+</LinearLayout>
