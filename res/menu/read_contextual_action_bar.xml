@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item
+        android:id="@+id/cab_annotate"
+        android:icon="@drawable/icon_comment"
+        android:onClick="onConextualMenuItemClicked"
+        android:showAsAction="always"
+        android:title="@string/menu_annotate">
+    </item>
+</menu>

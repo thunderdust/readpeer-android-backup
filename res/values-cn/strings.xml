@@ -57,5 +57,5 @@
     <string name="my_account">Account</string>
     <string name="content_description">Image</string>
     <string name="signUp">Join Now</string>
-    <string name="menu_annotate">Annotate</string>
+    <string name="menu_annotate">做笔记</string>
 </resources>

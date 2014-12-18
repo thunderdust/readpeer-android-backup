@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import socialatwork.readpeer.WebRelatedComponents.MyWebView;
-
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Point;
@@ -35,7 +33,7 @@ import com.bossturban.webviewmarker.TextSelectionSupport;
 
 public class ReadBookHtmlActivity extends FragmentActivity {
 
-	private static MyWebView mWebView;
+	private static WebView mWebView;
 	private final String TAG = "Read Book Html";
 	// Basic information
 	private String mBookIndex;
@@ -47,9 +45,9 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 	private String mHighlight;
 
 	/* Must be an odd number >= 3 to have the central page index */
-	private final int viewPagerWindowSize = 5;
+	private final int VIEW_PAGER_WINDOW_SIZE = 5;
 	/* Page index of the pages loaded in view pager */
-	private int[] viewPagerIndexList = new int[viewPagerWindowSize];
+	private int[] viewPagerIndexList = new int[VIEW_PAGER_WINDOW_SIZE];
 	// private static int pageWindowCentralIndex = 0;
 	// Html file related
 	private ArrayList<String> mHtmlFilePathList;
@@ -58,9 +56,9 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 	private List<WebView> mWebViewList;
 	private MyPagerAdapter mPagerAdapter;
 	private ViewPager mViewPager;
+	private ActionMode mActionMode = null;
 
 	private static Dialog mHighlightDialog;
-
 	/*
 	 * the string used to separate highlight text and its offset, which are
 	 * combined as one string when passed from JS
@@ -69,8 +67,9 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 	/* Set to ignore meaningless highlights */
 	private final int HIGHLIGHT_MINIMAL_LENGTH = 6;
 
-	private TextSelectionSupport mTextSelectionSupport;
+	// private TextSelectionSupport mTextSelectionSupport;
 
+	/* start --- View Pager Settings and Attributes --- */
 	private class MyPagerAdapter extends PagerAdapter {
 
 		private ArrayList<View> mWebViewList = new ArrayList<View>();
@@ -159,15 +158,18 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 	private void addView(MyPagerAdapter p, View newPage) {
 		int pageIndex = p.addView(newPage);
 		// mViewPager.setCurrentItem(pageIndex,true);
+		Log.d(TAG, "page index: " + pageIndex);
 	}
 
 	private void addView(MyPagerAdapter p, View newPage, int index) {
 		int pageIndex = p.addView(newPage, index);
+		Log.d(TAG, "page index: " + pageIndex);
 	}
 
 	private void removeView(MyPagerAdapter p, View unwantedPage,
 			ViewPager mPager) {
 		int pageIndex = p.removeView(mPager, unwantedPage);
+		Log.d(TAG, "page index: " + pageIndex);
 
 	}
 
@@ -180,6 +182,50 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 		mPager.setCurrentItem(p.getItemPosition(pageToShow), true);
 	}
 
+	/* --- View Pager Settings and Attributes --- end */
+
+	/* Customized context action bar (CAB) */
+	@Override
+	public void onActionModeStarted(ActionMode m) {
+		Log.d(TAG, "action mode stared");
+		if (mActionMode == null) {
+			mActionMode = m;
+			Menu menu = m.getMenu();
+			// Remove the default menu items
+			menu.clear();
+			Log.d(TAG, "size of menu: " + menu.size());
+			// Remove first menu item (usually is selectAll)
+			// MenuItem firstItem = menu.getItem(0);
+			// Log.d(TAG,"first item:"+firstItem.getTitle());
+			// menu.removeItem(firstItem.getItemId());
+			// MenuItem annotateItem = menu.add("Annotate");
+			// Make sure annotate always displayed in CAB
+			// annotateItem.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
+			m.getMenuInflater()
+					.inflate(R.menu.read_contextual_action_bar, menu);
+		}
+		super.onActionModeStarted(m);
+	}
+
+	@Override
+	public void onActionModeFinished(ActionMode m) {
+		mActionMode = null;
+		Log.d(TAG, "action mode is finished");
+		super.onActionModeFinished(m);
+	}
+
+	public boolean onContextualMenuItemClicked(MenuItem item) {
+		Log.d(TAG, "contextual menu item is clicked");
+		switch (item.getItemId()) {
+		case R.id.cab_annotate:
+			Log.d(TAG, "annotate item is selected");
+			return true;
+		default:
+			return false;
+		}
+
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -187,7 +233,7 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_read_book_html);
 		setupBasicValues();
-		setWebViewList(0, viewPagerWindowSize);
+		setWebViewList(0, VIEW_PAGER_WINDOW_SIZE);
 		// mWebView = (WebView) findViewById(R.id.read_book_webview);
 		mViewPager = (ViewPager) findViewById(R.id.read_book_viewPager);
 		mPagerAdapter = new MyPagerAdapter();
@@ -197,7 +243,8 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 		mHighlightDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		mHighlightDialog.setContentView(R.layout.dialog_highlight_menu);
 		mHighlightDialog.setCanceledOnTouchOutside(true);
-		Button annotateCancelButton = (Button) mHighlightDialog.findViewById(R.id.btn_cancel_annotate);
+		Button annotateCancelButton = (Button) mHighlightDialog
+				.findViewById(R.id.btn_cancel_annotate);
 		annotateCancelButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -206,7 +253,6 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 				}
 			}
 		});
-		
 
 		for (int i = 0; i < mWebViewList.size(); i++) {
 			addView(mPagerAdapter, mWebViewList.get(i));
@@ -238,13 +284,13 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 				Log.d(TAG, "current item: " + mViewPager.getCurrentItem());
 
 				// Delete the first one, add one more
-				if (index == viewPagerWindowSize / 2 + 1) {
+				if (index == VIEW_PAGER_WINDOW_SIZE / 2 + 1) {
 					Log.d(TAG, "the second last one: " + index);
 
 					// if not second last html page
 					if (mPageIndex < mHtmlFileNumber - 2) {
 
-						MyWebView mWebView = new MyWebView(getApplicationContext());
+						WebView mWebView = new WebView(getApplicationContext());
 						initializeWebView(mWebView, mPageIndex + 2);
 						addView(mPagerAdapter, mWebView);
 
@@ -279,7 +325,7 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 					// if not second last html page
 					if (mPageIndex > 1) {
 
-						MyWebView mWebView = new MyWebView(getApplicationContext());
+						WebView mWebView = new WebView(getApplicationContext());
 						initializeWebView(mWebView, mPageIndex - 2);
 						addView(mPagerAdapter, mWebView, 0);
 
@@ -378,7 +424,8 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 	private void setUpAnnotateButton(final String mHighlight,
 			final int startOffset, final int endOffset) {
 		if (mHighlightDialog != null) {
-			Button annotateBtn = (Button) mHighlightDialog.findViewById(R.id.btn_annotate);
+			Button annotateBtn = (Button) mHighlightDialog
+					.findViewById(R.id.btn_annotate);
 			annotateBtn.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -409,7 +456,7 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 		startActivity(toNewAnnotation);
 	}
 
-	private void initializeWebView(final MyWebView mWebView, int filePathIndex) {
+	private void initializeWebView(final WebView mWebView, int filePathIndex) {
 		// reset webview
 		mWebView.loadUrl("about:blank");
 		WebSettings webSettings = mWebView.getSettings();
@@ -433,46 +480,34 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 		mWebView.addJavascriptInterface(new myJavascriptHandler(),
 				"valueCallback");
 
-		mTextSelectionSupport = TextSelectionSupport.support(this, mWebView);
-		mTextSelectionSupport
-				.setSelectionListener(new TextSelectionSupport.SelectionListener() {
-					@Override
-					public void startSelection() {
-					}
-
-					@Override
-					public void selectionChanged(String text) {
-						// Toast.makeText(ReadBookHtmlActivity.this,
-						// text,Toast.LENGTH_SHORT).show();
-						mWebView.post(new Runnable() {
-							@Override
-							public void run() {
-								mWebView.loadUrl("javascript:android.selection.getSelectionOffset();");
-								mHighlightDialog.show();
-
-							}
-						});
-					}
-
-					@Override
-					public void endSelection() {
-						mWebView.loadUrl("javascript:android.selection.clearSelection();");
-					}
-				});
-		mWebView.setWebViewClient(new WebViewClient() {
-			public void onScaleChanged(WebView view, float oldScale,
-					float newScale) {
-				Log.d(TAG, "Scale Changed !");
-				try {
-					mTextSelectionSupport.onScaleChanged(oldScale, newScale);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				Log.d(TAG, "old:" + oldScale);
-				Log.d(TAG, "new:" + newScale);
-			}
-		});
+		/*
+		 * mTextSelectionSupport = TextSelectionSupport.support(this, mWebView);
+		 * mTextSelectionSupport .setSelectionListener(new
+		 * TextSelectionSupport.SelectionListener() {
+		 * 
+		 * @Override public void startSelection() { }
+		 * 
+		 * @Override public void selectionChanged(String text) { //
+		 * Toast.makeText(ReadBookHtmlActivity.this, //
+		 * text,Toast.LENGTH_SHORT).show(); mWebView.post(new Runnable() {
+		 * 
+		 * @Override public void run() {
+		 * mWebView.loadUrl("javascript:android.selection.getSelectionOffset();"
+		 * ); mHighlightDialog.show();
+		 * 
+		 * } }); }
+		 * 
+		 * @Override public void endSelection() {
+		 * mWebView.loadUrl("javascript:android.selection.clearSelection();"); }
+		 * }); mWebView.setWebViewClient(new WebViewClient() { public void
+		 * onScaleChanged(WebView view, float oldScale, float newScale) {
+		 * Log.d(TAG, "Scale Changed !"); try {
+		 * mTextSelectionSupport.onScaleChanged(oldScale, newScale); } catch
+		 * (Exception e) { e.printStackTrace(); } Log.d(TAG, "old:" + oldScale);
+		 * Log.d(TAG, "new:" + newScale); } });
+		 */
 		mWebView.loadUrl("file:///android_asset/content.html");
+		// mWebView.loadUrl(absolutePath);
 	}
 
 	private void setWebViewList(int startPageIndex, int windowSize) {
@@ -485,7 +520,7 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 			mWebViewList = new ArrayList<WebView>();
 			// Add pre-defined number of webviews into the list
 			for (int i = 0; i < windowSize; i++) {
-				MyWebView mWebView = new MyWebView(this);
+				WebView mWebView = new WebView(this);
 				initializeWebView(mWebView, startPageIndex + i);
 				mWebViewList.add(mWebView);
 				viewPagerIndexList[i] = startPageIndex + i;
