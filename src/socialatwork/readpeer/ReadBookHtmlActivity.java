@@ -20,6 +20,7 @@ import android.view.ActionMode;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -69,121 +70,6 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 
 	// private TextSelectionSupport mTextSelectionSupport;
 
-	/* start --- View Pager Settings and Attributes --- */
-	private class MyPagerAdapter extends PagerAdapter {
-
-		private ArrayList<View> mWebViewList = new ArrayList<View>();
-
-		@Override
-		public int getItemPosition(Object o) {
-			return mWebViewList.indexOf(o);
-		}
-
-		@Override
-		public int getCount() {
-			return mWebViewList.size();
-		}
-
-		@Override
-		public boolean isViewFromObject(View arg0, Object arg1) {
-			return arg0 == (arg1);
-		}
-
-		@Override
-		public void destroyItem(ViewGroup container, int position, Object object) {
-			container.removeView(mWebViewList.get(position));
-		}
-
-		/*
-		 * Used by ViewPager. Called when ViewPager needs a page to display; it
-		 * is our job to add the page to the container, which is normally the
-		 * ViewPager itself. Since all our pages are persistent, we simply
-		 * retrieve it from our "views" ArrayList.
-		 */
-		@Override
-		public Object instantiateItem(ViewGroup container, int position) {
-			View v = mWebViewList.get(position);
-			container.addView(v);
-			return v;
-		}
-
-		// Add view at end of list, return its index
-		public int addView(View v) {
-			return addView(v, mWebViewList.size());
-		}
-
-		public int addView(View v, int position) {
-			mWebViewList.add(position, (WebView) v);
-			notifyDataSetChanged();
-			return position;
-		}
-
-		// -----------------------------------------------------------------------------
-		// Removes "view" from "views".
-		// Retuns position of removed view.
-		// The app should call this to remove pages; not used by ViewPager.
-		public int removeView(ViewPager pager, View v) {
-			return removeView(pager, mWebViewList.indexOf(v));
-		}
-
-		// -----------------------------------------------------------------------------
-		// Removes the "view" at "position" from "views".
-		// Retuns position of removed view.
-		// The app should call this to remove pages; not used by ViewPager.
-		public int removeView(ViewPager pager, int position) {
-			/*
-			 * ViewPager doesn't have a delete method; the closest is to set the
-			 * adapter again. When doing so, it deletes all its views. Then we
-			 * can delete the view from from the adapter and finally set the
-			 * adapter to the pager again. Note that we set the adapter to null
-			 * before removing the view from "views" - that's because while
-			 * ViewPager deletes all its views, it will call destroyItem which
-			 * will in turn cause a null pointer ref.
-			 */
-			pager.setAdapter(null);
-			mWebViewList.remove(position);
-			notifyDataSetChanged();
-			pager.setAdapter(this);
-			return position;
-		}
-
-		// -----------------------------------------------------------------------------
-		// Returns the "view" at "position".
-		// The app should call this to retrieve a view; not used by ViewPager.
-		public View getView(int position) {
-			return mWebViewList.get(position);
-		}
-	}
-
-	private void addView(MyPagerAdapter p, View newPage) {
-		int pageIndex = p.addView(newPage);
-		// mViewPager.setCurrentItem(pageIndex,true);
-		Log.d(TAG, "page index: " + pageIndex);
-	}
-
-	private void addView(MyPagerAdapter p, View newPage, int index) {
-		int pageIndex = p.addView(newPage, index);
-		Log.d(TAG, "page index: " + pageIndex);
-	}
-
-	private void removeView(MyPagerAdapter p, View unwantedPage,
-			ViewPager mPager) {
-		int pageIndex = p.removeView(mPager, unwantedPage);
-		Log.d(TAG, "page index: " + pageIndex);
-
-	}
-
-	private View getCurrentPage(MyPagerAdapter p, ViewPager mPager) {
-		return p.getView(mPager.getCurrentItem());
-	}
-
-	private void setCurrentPage(View pageToShow, ViewPager mPager,
-			MyPagerAdapter p) {
-		mPager.setCurrentItem(p.getItemPosition(pageToShow), true);
-	}
-
-	/* --- View Pager Settings and Attributes --- end */
-
 	/* Customized context action bar (CAB) */
 	@Override
 	public void onActionModeStarted(ActionMode m) {
@@ -194,17 +80,41 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 			// Remove the default menu items
 			menu.clear();
 			Log.d(TAG, "size of menu: " + menu.size());
-			// Remove first menu item (usually is selectAll)
-			// MenuItem firstItem = menu.getItem(0);
-			// Log.d(TAG,"first item:"+firstItem.getTitle());
-			// menu.removeItem(firstItem.getItemId());
-			// MenuItem annotateItem = menu.add("Annotate");
-			// Make sure annotate always displayed in CAB
-			// annotateItem.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
 			m.getMenuInflater()
 					.inflate(R.menu.read_contextual_action_bar, menu);
+			MenuItem firstItem = menu.getItem(0);
+			firstItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+				@Override
+				public boolean onMenuItemClick(MenuItem item) {
+					Log.d(TAG, "menu item " + item.getTitle() + " is clicked");
+					if (mWebView == null) {
+						mWebView = getCurrentWebView();
+					}
+					Log.d(TAG, "about to load javascript");
+
+					mWebView.post(new Runnable() {
+						@Override
+						public void run() {
+							mWebView.loadUrl("javascript:android.selection.getSelectionOffset();");
+						}
+					});
+					return true;
+				}
+			});
 		}
 		super.onActionModeStarted(m);
+	}
+
+	public WebView getCurrentWebView() {
+
+		if (mViewPager == null) {
+			if (mPagerAdapter == null) {
+				mPagerAdapter = new MyPagerAdapter();
+			}
+			setUpViewPager();
+		}
+		int index = mViewPager.getCurrentItem();
+		return (WebView) mViewPager.getChildAt(index);
 	}
 
 	@Override
@@ -214,16 +124,10 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 		super.onActionModeFinished(m);
 	}
 
-	public boolean onContextualMenuItemClicked(MenuItem item) {
-		Log.d(TAG, "contextual menu item is clicked");
-		switch (item.getItemId()) {
-		case R.id.cab_annotate:
-			Log.d(TAG, "annotate item is selected");
-			return true;
-		default:
-			return false;
-		}
-
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		Log.d(TAG, "options menu item selected");
+		return true;
 	}
 
 	@Override
@@ -235,9 +139,8 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 		setupBasicValues();
 		setWebViewList(0, VIEW_PAGER_WINDOW_SIZE);
 		// mWebView = (WebView) findViewById(R.id.read_book_webview);
-		mViewPager = (ViewPager) findViewById(R.id.read_book_viewPager);
 		mPagerAdapter = new MyPagerAdapter();
-		mViewPager.setAdapter(mPagerAdapter);
+		setUpViewPager();
 		mHighlightDialog = new Dialog(ReadBookHtmlActivity.this,
 				R.style.dialog_account);
 		mHighlightDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -258,21 +161,25 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 			addView(mPagerAdapter, mWebViewList.get(i));
 		}
 
-		mViewPager.setOnPageChangeListener(new OnPageChangeListener() {
+	}
 
+	private void setUpViewPager() {
+
+		mViewPager = (ViewPager) findViewById(R.id.read_book_viewPager);
+		if (mPagerAdapter != null) {
+			mViewPager.setAdapter(mPagerAdapter);
+		}
+		mViewPager.setOnPageChangeListener(new OnPageChangeListener() {
 			@Override
 			public void onPageScrollStateChanged(int arg0) {
-				// TODO Auto-generated method stub
 			}
 
 			@Override
 			public void onPageScrolled(int arg0, float arg1, int arg2) {
-				// TODO Auto-generated method stub
 			}
 
 			@Override
 			public void onPageSelected(int index) {
-
 				// Update current html page number
 				mPageIndex = viewPagerIndexList[index];
 				Log.d(TAG, "corresponding html page index: " + mPageIndex);
@@ -355,7 +262,6 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 					}
 				}
 			}
-
 		});
 	}
 
@@ -595,8 +501,118 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 		return true;
 	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		return false;
+	/* start --- View Pager Settings and Attributes --- */
+	private class MyPagerAdapter extends PagerAdapter {
+
+		private ArrayList<View> mWebViewList = new ArrayList<View>();
+
+		@Override
+		public int getItemPosition(Object o) {
+			return mWebViewList.indexOf(o);
+		}
+
+		@Override
+		public int getCount() {
+			return mWebViewList.size();
+		}
+
+		@Override
+		public boolean isViewFromObject(View arg0, Object arg1) {
+			return arg0 == (arg1);
+		}
+
+		@Override
+		public void destroyItem(ViewGroup container, int position, Object object) {
+			container.removeView(mWebViewList.get(position));
+		}
+
+		/*
+		 * Used by ViewPager. Called when ViewPager needs a page to display; it
+		 * is our job to add the page to the container, which is normally the
+		 * ViewPager itself. Since all our pages are persistent, we simply
+		 * retrieve it from our "views" ArrayList.
+		 */
+		@Override
+		public Object instantiateItem(ViewGroup container, int position) {
+			View v = mWebViewList.get(position);
+			container.addView(v);
+			return v;
+		}
+
+		// Add view at end of list, return its index
+		public int addView(View v) {
+			return addView(v, mWebViewList.size());
+		}
+
+		public int addView(View v, int position) {
+			mWebViewList.add(position, (WebView) v);
+			notifyDataSetChanged();
+			return position;
+		}
+
+		// -----------------------------------------------------------------------------
+		// Removes "view" from "views".
+		// Retuns position of removed view.
+		// The app should call this to remove pages; not used by ViewPager.
+		public int removeView(ViewPager pager, View v) {
+			return removeView(pager, mWebViewList.indexOf(v));
+		}
+
+		// -----------------------------------------------------------------------------
+		// Removes the "view" at "position" from "views".
+		// Retuns position of removed view.
+		// The app should call this to remove pages; not used by ViewPager.
+		public int removeView(ViewPager pager, int position) {
+			/*
+			 * ViewPager doesn't have a delete method; the closest is to set the
+			 * adapter again. When doing so, it deletes all its views. Then we
+			 * can delete the view from from the adapter and finally set the
+			 * adapter to the pager again. Note that we set the adapter to null
+			 * before removing the view from "views" - that's because while
+			 * ViewPager deletes all its views, it will call destroyItem which
+			 * will in turn cause a null pointer ref.
+			 */
+			pager.setAdapter(null);
+			mWebViewList.remove(position);
+			notifyDataSetChanged();
+			pager.setAdapter(this);
+			return position;
+		}
+
+		// -----------------------------------------------------------------------------
+		// Returns the "view" at "position".
+		// The app should call this to retrieve a view; not used by ViewPager.
+		public View getView(int position) {
+			return mWebViewList.get(position);
+		}
 	}
+
+	private void addView(MyPagerAdapter p, View newPage) {
+		int pageIndex = p.addView(newPage);
+		// mViewPager.setCurrentItem(pageIndex,true);
+		Log.d(TAG, "page index: " + pageIndex);
+	}
+
+	private void addView(MyPagerAdapter p, View newPage, int index) {
+		int pageIndex = p.addView(newPage, index);
+		Log.d(TAG, "page index: " + pageIndex);
+	}
+
+	private void removeView(MyPagerAdapter p, View unwantedPage,
+			ViewPager mPager) {
+		int pageIndex = p.removeView(mPager, unwantedPage);
+		Log.d(TAG, "page index: " + pageIndex);
+
+	}
+
+	private View getCurrentPage(MyPagerAdapter p, ViewPager mPager) {
+		return p.getView(mPager.getCurrentItem());
+	}
+
+	private void setCurrentPage(View pageToShow, ViewPager mPager,
+			MyPagerAdapter p) {
+		mPager.setCurrentItem(p.getItemPosition(pageToShow), true);
+	}
+	/* --- View Pager Settings and Attributes --- end */
+
 }

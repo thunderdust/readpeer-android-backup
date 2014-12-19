@@ -90,6 +90,8 @@ android.selection.longTouch = function() {
 // Return the character offset back to android application
         
 android.selection.getSelectionOffset = function(){
+
+    console.log('test');
     try {
         
         var sel = window.getSelection();
@@ -97,14 +99,13 @@ android.selection.getSelectionOffset = function(){
         if (!sel){
             return;
         }
+        console.log('has selection');
         if (!el){
             return;
         }
-        
-        //window.valueCallback.sendToAndroid("The element is not NULL !");
+        console.log('has specified element');
         var caretOffset = getCaretCharacterOffsetWithin(el);
-        //window.valueCallback.sendToAndroid("After execution the func");
-        //window.valueCallback.sendToAndroid("else");
+        console.log('finish calculating caret offset');
         var range = sel.getRangeAt(0);
         //var start_offset = range.startOffset;
         //var end_offset = range.endOffset;
