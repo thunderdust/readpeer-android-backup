@@ -4,9 +4,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.annotation.TargetApi;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Point;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -93,9 +95,10 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 					Log.d(TAG, "about to load javascript");
 
 					mWebView.post(new Runnable() {
+						@TargetApi(19)
 						@Override
 						public void run() {
-							mWebView.loadUrl("javascript:android.selection.getSelectionOffset();");
+							mWebView.evaluateJavascript("javascript:android.selection.getSelectionOffset();", null);
 						}
 					});
 					return true;
@@ -297,10 +300,11 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 
 		// Requires Jelly bean or later
 		@JavascriptInterface
-		public void sendToAndroid(String hightlightTextPlusOffset)
+		public void sendToAndroid(String text)
 				throws startOffsetNonPositiveException {
 			// this is called from JS with passed values
-			Log.d(TAG, hightlightTextPlusOffset);
+			Log.d(TAG, text);
+			/*
 			int separatorIndex = hightlightTextPlusOffset
 					.lastIndexOf(hightlightAndOffsetSeparator);
 			String text = hightlightTextPlusOffset.substring(0, separatorIndex);
@@ -324,6 +328,7 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 				}
 			} else {
 			}
+			*/
 		}
 	}
 

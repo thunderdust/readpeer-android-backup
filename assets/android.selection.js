@@ -95,27 +95,31 @@ android.selection.getSelectionOffset = function(){
     try {
         
         var sel = window.getSelection();
-        var el = document.getElementById("content-holder");
+        //var el = document.getElementById("content-holder");
         if (!sel){
             return;
         }
         console.log('has selection');
-        if (!el){
-            return;
-        }
-        console.log('has specified element');
-        var caretOffset = getCaretCharacterOffsetWithin(el);
-        console.log('finish calculating caret offset');
+        //if (!el){
+        //    return;
+        //}
+        //console.log('has specified element');
+        //var caretOffset = getCaretCharacterOffsetWithin(el);
+        //console.log('finish calculating caret offset');
         var range = sel.getRangeAt(0);
         //var start_offset = range.startOffset;
         //var end_offset = range.endOffset;
         var text = sel.toString();
+        window.valueCallback.sendToAndroid(String(text));
+        /*
         if (text && caretOffset){
             var separator = "_";
             var hightlightTextPlusOffset = text + separator + caretOffset;
             window.valueCallback.sendToAndroid(String(hightlightTextPlusOffset));
         }
         else return;
+        */
+       
     }
     catch (e) {
         window.TextSelection.jsError(e);
