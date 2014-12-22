@@ -89,36 +89,40 @@ android.selection.longTouch = function() {
 // Written by Liu Weiran
 // Return the character offset back to android application
         
-android.selection.getSelectionOffset = function(){
-
-    console.log('test');
+android.selection.getSelectionOffset = function(string containerId){
     try {
         
         var sel = window.getSelection();
-        //var el = document.getElementById("content-holder");
         if (!sel){
+            console.log('window has NO selection');
             return;
         }
-        console.log('has selection');
-        //if (!el){
-        //    return;
-        //}
-        //console.log('has specified element');
-        //var caretOffset = getCaretCharacterOffsetWithin(el);
-        //console.log('finish calculating caret offset');
+        else{
+            console.log('window has selection');
+        }
+        var el = document.getElementById(containerId);
+        if (!el){
+            console.log('specified element not found');
+            return;
+        }
+        else{
+            console.log('element specified is found');
+        }
+        
+        var caretOffset = getCaretCharacterOffsetWithin(el);
+        console.log('finish calculating caret offset');
         var range = sel.getRangeAt(0);
         //var start_offset = range.startOffset;
         //var end_offset = range.endOffset;
         var text = sel.toString();
-        window.valueCallback.sendToAndroid(String(text));
-        /*
+        //window.valueCallback.sendToAndroid(String(text));
+        
         if (text && caretOffset){
             var separator = "_";
             var hightlightTextPlusOffset = text + separator + caretOffset;
             window.valueCallback.sendToAndroid(String(hightlightTextPlusOffset));
         }
         else return;
-        */
        
     }
     catch (e) {

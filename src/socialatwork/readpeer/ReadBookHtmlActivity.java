@@ -611,6 +611,7 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 	}
 
 	private View getCurrentPage(MyPagerAdapter p, ViewPager mPager) {
+		Log.d(TAG, "page index: " + mPager.getCurrentItem());
 		return p.getView(mPager.getCurrentItem());
 	}
 

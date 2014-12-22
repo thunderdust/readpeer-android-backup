@@ -211,10 +211,12 @@ public class tdHttpClient {
 	/*
 	 * SECTION START <Book Related Methods>
 	 */
-	
+
 	/* This method retrieve html of the specified page of certain book */
-	public String getBookHtmlByPage (String access_token, String page_num, String bookID) throws Exception{
-		String requestBookHtmlURL = BOOK_URL+"/"+"2903"+"/html"+"?access_token="+access_token+"&page_number="+page_num;
+	public String getBookHtmlByPage(String access_token, String page_num,
+			String bookID) throws Exception {
+		String requestBookHtmlURL = BOOK_URL + "/" + bookID + "/html"
+				+ "?access_token=" + access_token + "&page_number=" + page_num;
 		HttpGet getBookHtml = new HttpGet(requestBookHtmlURL);
 		HttpResponse response = mHttpClient.execute(getBookHtml);
 		if (response != null) {
@@ -233,13 +235,14 @@ public class tdHttpClient {
 				return null;
 			}
 		}
-		return null;	
+		return null;
 	}
 
 	/* Get book list on user's reading list from server */
-	public String getUserReadings(String userID, String access_token) throws Exception {
-		
-		String requestBookURL = USER_URL +"/"+userID+"/library";
+	public String getUserReadings(String userID, String access_token)
+			throws Exception {
+
+		String requestBookURL = USER_URL + "/" + userID + "/library";
 		HttpGet getUserReading = new HttpGet(requestBookURL);
 		HttpResponse response = mHttpClient.execute(getUserReading);
 		if (response != null) {
@@ -260,11 +263,12 @@ public class tdHttpClient {
 		}
 		return null;
 	}
-	
-	public boolean deleteUserBook(String bookID, String access_token,String uid) throws Exception{
-		
-		URL url = new URL(USER_URL + "/" + uid + "/library"
-				+ "?access_token=" + access_token + "&book_id=" + bookID);
+
+	public boolean deleteUserBook(String bookID, String access_token, String uid)
+			throws Exception {
+
+		URL url = new URL(USER_URL + "/" + uid + "/library" + "?access_token="
+				+ access_token + "&book_id=" + bookID);
 		HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 		httpCon.setRequestMethod("DELETE");
 		httpCon.connect();
@@ -283,10 +287,11 @@ public class tdHttpClient {
 				return false;
 			}
 		}
-		return false;		
+		return false;
 	}
-	
-	public boolean addUserBook(String bookID, String access_token, String uid) throws Exception{
+
+	public boolean addUserBook(String bookID, String access_token, String uid)
+			throws Exception {
 		String bookDeletionUrl = USER_URL + "/" + uid + "/library";
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
 		nameValuePairs

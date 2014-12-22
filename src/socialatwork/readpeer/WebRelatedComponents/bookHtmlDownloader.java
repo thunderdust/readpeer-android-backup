@@ -34,13 +34,11 @@ public class bookHtmlDownloader {
 			String bookName, String author, String access_token)
 			throws JSONException, Exception {
 
-		
-		String bookIndex2 = "2903";
 		mHttpClient = tdHttpClient.getClientInstance();
 		bookContentWhole = new StringBuffer();
 
 		JSONObject bookObject = new JSONObject(mHttpClient.getBookDetails(
-				bookIndex2, access_token));
+				bookIndex, access_token));
 		Log.d(TAG, "book detail:" + bookObject.toString());
 		// String code = bookObject.getString("code");
 		// String message = bookObject.getString("message");
