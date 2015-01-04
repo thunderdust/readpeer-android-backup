@@ -54,6 +54,7 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 	// private static int pageWindowCentralIndex = 0;
 	// Html file related
 	private ArrayList<String> mHtmlFilePathList;
+	private ArrayList<String> mHtmlFileNameList;
 	private int mHtmlFileNumber;
 	private final int HANDLER_MESSAGE_GET_HTML_DONE = 0;
 	private List<WebView> mWebViewList;
@@ -98,7 +99,9 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 						@TargetApi(19)
 						@Override
 						public void run() {
-							mWebView.evaluateJavascript("javascript:android.selection.getSelectionOffset();", null);
+							mWebView.evaluateJavascript(
+									"javascript:android.selection.getSelectionOffset();",
+									null);
 						}
 					});
 					return true;
@@ -305,30 +308,26 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 			// this is called from JS with passed values
 			Log.d(TAG, text);
 			/*
-			int separatorIndex = hightlightTextPlusOffset
-					.lastIndexOf(hightlightAndOffsetSeparator);
-			String text = hightlightTextPlusOffset.substring(0, separatorIndex);
-			Log.d(TAG, "text: " + text);
-			String endOffsetString = hightlightTextPlusOffset.substring(
-					separatorIndex + 1, hightlightTextPlusOffset.length());
-			Log.d(TAG, "endOffsetString: " + endOffsetString
-					+ " String length: " + endOffsetString.length());
-			int endOffset = Integer.parseInt(endOffsetString);
-
-			if (text.length() >= HIGHLIGHT_MINIMAL_LENGTH) {
-
-				mHighlight = text;
-				int startOffset = endOffset - mHighlight.length();
-				if (startOffset <= 0) {
-					throw new startOffsetNonPositiveException(
-							"start offset of a highlight cannot be non-positive!");
-				} else {
-					// prepare button action for the highlight menu
-					setUpAnnotateButton(mHighlight, startOffset, endOffset);
-				}
-			} else {
-			}
-			*/
+			 * int separatorIndex = hightlightTextPlusOffset
+			 * .lastIndexOf(hightlightAndOffsetSeparator); String text =
+			 * hightlightTextPlusOffset.substring(0, separatorIndex); Log.d(TAG,
+			 * "text: " + text); String endOffsetString =
+			 * hightlightTextPlusOffset.substring( separatorIndex + 1,
+			 * hightlightTextPlusOffset.length()); Log.d(TAG,
+			 * "endOffsetString: " + endOffsetString + " String length: " +
+			 * endOffsetString.length()); int endOffset =
+			 * Integer.parseInt(endOffsetString);
+			 * 
+			 * if (text.length() >= HIGHLIGHT_MINIMAL_LENGTH) {
+			 * 
+			 * mHighlight = text; int startOffset = endOffset -
+			 * mHighlight.length(); if (startOffset <= 0) { throw new
+			 * startOffsetNonPositiveException(
+			 * "start offset of a highlight cannot be non-positive!"); } else {
+			 * // prepare button action for the highlight menu
+			 * setUpAnnotateButton(mHighlight, startOffset, endOffset); } } else
+			 * { }
+			 */
 		}
 	}
 
@@ -388,6 +387,10 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 				+ mHtmlFilePathList.get(filePathIndex);
 		Log.d(TAG, "absolute path:" + absolutePath);
 
+		String assetPath = "file:///android_asset/"
+				+ mHtmlFileNameList.get(filePathIndex);
+		Log.d(TAG, "asset path:" + assetPath);
+
 		mWebView.addJavascriptInterface(new myJavascriptHandler(),
 				"valueCallback");
 
@@ -417,7 +420,7 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 		 * (Exception e) { e.printStackTrace(); } Log.d(TAG, "old:" + oldScale);
 		 * Log.d(TAG, "new:" + newScale); } });
 		 */
-		mWebView.loadUrl("file:///android_asset/content.html");
+		mWebView.loadUrl(assetPath);
 		// mWebView.loadUrl(absolutePath);
 	}
 
@@ -465,9 +468,37 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 		setTitle(mBookName);
 		mUid = extra.getString("uid");
 		mHtmlFilePathList = new ArrayList<String>();
+		mHtmlFileNameList = new ArrayList<String>();
 		mHtmlFilePathList = getBookHtmlPath(mBookIndex, mBookName);
+		mHtmlFileNameList = getBookHtmlName(mBookIndex, mBookName);
 		mHtmlFileNumber = mHtmlFilePathList.size();
 
+	}
+
+	private ArrayList<String> getBookHtmlName(final String bookIndex,
+			final String bookName) {
+
+		if (Environment.getExternalStorageState().equals(
+				Environment.MEDIA_MOUNTED)) {
+			String rootPath = Environment.getExternalStorageDirectory()
+					.getPath();
+			String bookFolderPath = rootPath + "/Readpeer/Books/" + bookIndex
+					+ "-" + bookName;
+			File bookFolderFile = new File(bookFolderPath);
+
+			if (bookFolderFile != null) {
+				String[] filesList = bookFolderFile.list();
+				ArrayList<String> htmlFileNameList = new ArrayList<String>();
+				for (int i = 0; i < filesList.length; i++) {
+					if (!filesList[i].endsWith("-info.txt")) {
+						htmlFileNameList.add(filesList[i]);
+					}
+				}
+				return htmlFileNameList;
+			}
+		} else
+			return null;
+		return null;
 	}
 
 	private ArrayList<String> getBookHtmlPath(final String bookIndex,
@@ -481,11 +512,8 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 					+ "-" + bookName;
 			File bookFolderFile = new File(bookFolderPath);
 
-			if (bookFolderFile == null) {
-				return null;
-			} else {
+			if (bookFolderFile != null) {
 				String[] filesList = bookFolderFile.list();
-				int fileCount = filesList.length;
 				ArrayList<String> htmlFilePathList = new ArrayList<String>();
 				for (int i = 0; i < filesList.length; i++) {
 					if (!filesList[i].endsWith("-info.txt")) {
@@ -497,6 +525,7 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 			}
 		} else
 			return null;
+		return null;
 	}
 
 	@Override

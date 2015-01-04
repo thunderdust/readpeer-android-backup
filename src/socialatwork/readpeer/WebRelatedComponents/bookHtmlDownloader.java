@@ -21,6 +21,17 @@ public class bookHtmlDownloader {
 	private String[] bookHtmlPages;
 	private int pageCount;
 	private StringBuffer bookContentWhole;
+	// a html tag after which the script reference will be injected
+	private final String INJECT_HTML_TAG = "<head>";
+
+	/* Script reference and meta information */
+	private final String JQUERY_REF = "<script src='jquery-1.8.3.js'></script>";
+	private final String RANGY_REF1 = "<script src='rangy-core.js'></script>";
+	private final String RANGY_REF2 = "<script src='rangy-serializer.js'></script>";
+	private final String RANGY_REF3 = "<script src='rangy-textrange.js'></script>";
+	private final String RANGY_REF4 = "<script src='android.selection.js'></script>";
+	private final String RANGY_REF5 = "<script src='rangy-highlighter.js'></script>";
+	
 
 	// 'Synchronized' is to ensure there is only one instance
 	public static synchronized bookHtmlDownloader getDownloaderInstance() {
@@ -50,8 +61,11 @@ public class bookHtmlDownloader {
 			// html page index starts with 1
 			bookHtmlPages[i] = mHttpClient.getBookHtmlByPage(access_token,
 					Integer.toString(i + 1), bookIndex);
+			
 			if (bookHtmlPages[i] != null) {
 				Log.d(TAG, "Get page" + (i + 1) + "successfully");
+				bookHtmlPages[i] = injectScriptReference(bookHtmlPages[i]);
+				Log.d(TAG,bookHtmlPages[i]);
 			} else {
 				Log.e(TAG, "Get page" + (i + 1) + "failed");
 			}
@@ -60,6 +74,34 @@ public class bookHtmlDownloader {
 				access_token, uid);
 		saveBookHtmlIntoDisk(context, bookIndex, bookName, author,
 				bookHtmlPages);
+	}
+
+	/*
+	 * This method inject reference to javascript files into downloaded html
+	 * pages
+	 */
+	private String injectScriptReference(String content) {
+
+		int position = content.indexOf(INJECT_HTML_TAG);
+		String part1 = content.substring(0, position+INJECT_HTML_TAG.length());
+		Log.d(TAG,"substring 1: "+ part1);
+		String part2 = content.substring(position+INJECT_HTML_TAG.length(),content.length());
+		Log.d(TAG,"substring 2: "+part2);
+		StringBuffer sb = new StringBuffer(part1);
+		sb.append(JQUERY_REF);
+		sb.append("\n");
+		sb.append(RANGY_REF1);
+		sb.append("\n");
+		sb.append(RANGY_REF2);
+		sb.append("\n");
+		sb.append(RANGY_REF3);
+		sb.append("\n");
+		sb.append(RANGY_REF4);
+		sb.append("\n");
+		sb.append(RANGY_REF5);
+		sb.append("\n");
+		sb.append(part2);
+		return sb.toString();
 	}
 
 	private boolean addBookToReadingList(String bookID, String access_token,
