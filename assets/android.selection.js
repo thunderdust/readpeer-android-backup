@@ -89,9 +89,9 @@ android.selection.longTouch = function() {
 // Written by Liu Weiran
 // Return the character offset back to android application
         
-android.selection.getSelectionOffset = function(string containerId){
+android.selection.getSelectionOffset = function(containerId){
     try {
-        
+        console.log(containerId);
         var sel = window.getSelection();
         if (!sel){
             console.log('window has NO selection');
@@ -100,13 +100,34 @@ android.selection.getSelectionOffset = function(string containerId){
         else{
             console.log('window has selection');
         }
-        var el = document.getElementById(containerId);
-        if (!el){
-            console.log('specified element not found');
-            return;
+
+        var divEls = document.getElementsByTagName("div");
+        var i = 0;
+        var targetID = null;
+        for (i=0; i<divEls.length;i++){
+            var id = String(divEls[i].id);
+            console.log(id);
+            // found target element div 
+            if (id.indexOf("pf")>-1){
+                targetID = id;
+                console.log(targetID);
+                break;
+            }
         }
-        else{
-            console.log('element specified is found');
+
+        var el = null;
+        if (!targetID){
+           console.log('specified id not found');
+        }
+        else {
+              el = document.getElementById(targetID);
+             if (!el){
+                console.log('specified element not found');
+                return;
+             }
+             else{
+                console.log('element specified is found');
+             }
         }
         
         var caretOffset = getCaretCharacterOffsetWithin(el);

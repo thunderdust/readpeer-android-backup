@@ -43,8 +43,13 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 	private String mBookName;
 	private String access_token;
 	private String mUid;
-	/* Page number of html page, as a parameter used in annotation uploading */
-	private int mPageIndex;
+	/*
+	 * Page number of html page, as a parameter used in annotation uploading,
+	 * starting from 0
+	 */
+	private int mPageIndex = 0;
+	/* Html page index, used for html tag sequencing, starts from 1 */
+	private int mHtmlPageIndex = 1;
 	private String mHighlight;
 
 	/* Must be an odd number >= 3 to have the central page index */
@@ -93,14 +98,19 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 					if (mWebView == null) {
 						mWebView = getCurrentWebView();
 					}
+					// the id of container div in current html page, a necessary
+					// element for computing selection offset
+					final String currentContainerDivID = "pf" + mHtmlPageIndex;
+					Log.d(TAG,"current container div id: "+currentContainerDivID);
 					Log.d(TAG, "about to load javascript");
 
 					mWebView.post(new Runnable() {
 						@TargetApi(19)
 						@Override
 						public void run() {
+
 							mWebView.evaluateJavascript(
-									"javascript:android.selection.getSelectionOffset();",
+									"javascript:android.selection.getSelectionOffset("+currentContainerDivID+")",
 									null);
 						}
 					});
@@ -188,7 +198,9 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 			public void onPageSelected(int index) {
 				// Update current html page number
 				mPageIndex = viewPagerIndexList[index];
-				Log.d(TAG, "corresponding html page index: " + mPageIndex);
+				mHtmlPageIndex = mPageIndex + 1;
+				Log.d(TAG, "corresponding page index: " + mPageIndex);
+				Log.d(TAG, "corresponding html page index: " + mHtmlPageIndex);
 
 				View currentView = getCurrentPage(mPagerAdapter, mViewPager);
 				// Log.d(TAG, "selected index: " + index);
