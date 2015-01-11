@@ -32,8 +32,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 
-import com.bossturban.webviewmarker.TextSelectionSupport;
-
 public class ReadBookHtmlActivity extends FragmentActivity {
 
 	private static WebView mWebView;

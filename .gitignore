@@ -18,7 +18,7 @@ local.properties
 
 # Eclipse project files
 .classpath
-.project
+
 
 # cache files
 *.cache
@@ -32,7 +32,6 @@ bin/jarlist.cache
 #################
 
 *.pydevproject
-.project
 .metadata
 bin/
 tmp/
