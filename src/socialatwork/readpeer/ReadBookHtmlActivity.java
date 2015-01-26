@@ -1,14 +1,16 @@
 package socialatwork.readpeer;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Point;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -27,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -98,8 +101,10 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 					}
 					// the id of container div in current html page, a necessary
 					// element for computing selection offset
-					final String currentContainerDivID = "pf" + mHtmlPageIndex;
-					Log.d(TAG,"current container div id: "+currentContainerDivID);
+					final String currentContainerDivID = "page"
+							+ mHtmlPageIndex + "-div";
+					Log.d(TAG, "current container div id: "
+							+ currentContainerDivID);
 					Log.d(TAG, "about to load javascript");
 
 					mWebView.post(new Runnable() {
@@ -108,7 +113,7 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 						public void run() {
 
 							mWebView.evaluateJavascript(
-									"javascript:android.selection.getSelectionOffset("+currentContainerDivID+")",
+									"javascript:android.selection.getSelectionOffset()",
 									null);
 						}
 					});
@@ -376,6 +381,7 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 		startActivity(toNewAnnotation);
 	}
 
+	@SuppressLint("SetJavaScriptEnabled")
 	private void initializeWebView(final WebView mWebView, int filePathIndex) {
 		// reset webview
 		mWebView.loadUrl("about:blank");
@@ -383,7 +389,6 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 		webSettings.setJavaScriptEnabled(true);
 
 		// Enable zoom in zoom out
-
 		mWebView.getSettings().setUseWideViewPort(true);
 		mWebView.getSettings().setBuiltInZoomControls(true);
 		mWebView.getSettings().setDisplayZoomControls(false);
@@ -404,46 +409,75 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 		mWebView.addJavascriptInterface(new myJavascriptHandler(),
 				"valueCallback");
 
-		/*
-		 * mTextSelectionSupport = TextSelectionSupport.support(this, mWebView);
-		 * mTextSelectionSupport .setSelectionListener(new
-		 * TextSelectionSupport.SelectionListener() {
-		 * 
-		 * @Override public void startSelection() { }
-		 * 
-		 * @Override public void selectionChanged(String text) { //
-		 * Toast.makeText(ReadBookHtmlActivity.this, //
-		 * text,Toast.LENGTH_SHORT).show(); mWebView.post(new Runnable() {
-		 * 
-		 * @Override public void run() {
-		 * mWebView.loadUrl("javascript:android.selection.getSelectionOffset();"
-		 * ); mHighlightDialog.show();
-		 * 
-		 * } }); }
-		 * 
-		 * @Override public void endSelection() {
-		 * mWebView.loadUrl("javascript:android.selection.clearSelection();"); }
-		 * }); mWebView.setWebViewClient(new WebViewClient() { public void
-		 * onScaleChanged(WebView view, float oldScale, float newScale) {
-		 * Log.d(TAG, "Scale Changed !"); try {
-		 * mTextSelectionSupport.onScaleChanged(oldScale, newScale); } catch
-		 * (Exception e) { e.printStackTrace(); } Log.d(TAG, "old:" + oldScale);
-		 * Log.d(TAG, "new:" + newScale); } });
-		 */
+		mWebView.setWebChromeClient(new WebChromeClient());
+
+		// Load annotating javascripts after html load is done
+		mWebView.setWebViewClient(new WebViewClient() {
+			@Override
+			public void onPageFinished(WebView view, String url) {
+				super.onPageFinished(view, url);
+				Log.d(TAG, "page is loaded");
+				try {
+					loadAnnotatingJSFiles(view);
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+			}
+		});
 		mWebView.loadUrl(assetPath);
 		// mWebView.loadUrl(absolutePath);
 	}
 
+	// Load a webview with essential javascript files to enable annotating
+	public void loadAnnotatingJSFiles(WebView w) throws MalformedURLException {
+
+		String jQueryJS = "var jQueryScript = document.createElement(\"script\");";
+		jQueryJS += "jQueryScript.src=\"jquery-1.8.3.js\";";
+		jQueryJS += "document.body.appendChild(jQueryScript);";
+		w.loadUrl("javascript:" + jQueryJS);
+		
+		String selectionJS = "var selectionScript = document.createElement(\"script\");";
+		selectionJS += "selectionScript.src=\"android.selection.js\";";
+		selectionJS += "document.body.appendChild(selectionScript);";
+		w.loadUrl("javascript:" + selectionJS);
+		
+		String rangyJS = "var rangyScript = document.createElement(\"script\");";
+		rangyJS += "rangyScript.src=\"rangy-core.js\";";
+		rangyJS += "document.body.appendChild(rangyScript);";
+		w.loadUrl("javascript:" + rangyJS);
+		
+		String rangySerializerJS = "var rsScript = document.createElement(\"script\");";
+		rangySerializerJS += "rsScript.src=\"rangy-serializer.js\";";
+		rangySerializerJS += "document.body.appendChild(rsScript);";
+		w.loadUrl("javascript:" + rangySerializerJS);
+		
+		String rangyTextRangeJS = "var rtrScript = document.createElement(\"script\");";
+		rangyTextRangeJS += "rtrScript.src=\"rangy-textrange.js\";";
+		rangyTextRangeJS += "document.body.appendChild(rtrScript);";
+		w.loadUrl("javascript:" + rangyTextRangeJS);
+		
+		String rangyHighlighterJS = "var rhScript = document.createElement(\"script\");";
+		rangyHighlighterJS += "rhScript.src=\"rangy-textrange.js\";";
+		rangyHighlighterJS += "document.body.appendChild(rhScript);";
+		w.loadUrl("javascript:" + rangyHighlighterJS);
+
+	}
+
 	private void setWebViewList(int startPageIndex, int windowSize) {
 
-		if (startPageIndex < 0 || startPageIndex > mHtmlFileNumber - windowSize) {
+		Log.d(TAG, "html file number: " + mHtmlFileNumber);
+		if (startPageIndex < 0 || mHtmlFileNumber >= windowSize
+				&& startPageIndex > mHtmlFileNumber - windowSize) {
 			Log.e(TAG, "index out of range");
 		}
 
 		else {
+			int webViewWindowSize = windowSize;
+			if (mHtmlFileNumber < windowSize)
+				webViewWindowSize = mHtmlFileNumber;
 			mWebViewList = new ArrayList<WebView>();
 			// Add pre-defined number of webviews into the list
-			for (int i = 0; i < windowSize; i++) {
+			for (int i = 0; i < webViewWindowSize; i++) {
 				WebView mWebView = new WebView(this);
 				initializeWebView(mWebView, startPageIndex + i);
 				mWebViewList.add(mWebView);

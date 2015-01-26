@@ -113,6 +113,24 @@ public class BookShelfActivity extends FragmentActivity implements
 						R.drawable.icon_bookmark);
 				bookmarkButton.setCompoundDrawablesWithIntrinsicBounds(
 						bookmarkIcon, null, null, null);
+				
+				Button scannerButton = (Button) functionMenuDialog
+						.findViewById(R.id.btn_scanner);
+				scannerButton.setText("OCR");
+				Drawable scannerIcon = getResources().getDrawable(
+						R.drawable.icon_scanner);
+				scannerButton.setCompoundDrawablesWithIntrinsicBounds(
+						scannerIcon, null, null, null);
+				
+				scannerButton.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						Intent launchIntent = getPackageManager().getLaunchIntentForPackage("nus.readpeer");
+						launchIntent.putExtra("userID", uid);
+						launchIntent.putExtra("token", access_token);
+						startActivity(launchIntent);
+					}
+				});
 			}
 		});
 

@@ -29,7 +29,7 @@
             android:textStyle="bold" >
         </Button>
         <Button
-            android:id="@+id/btn_setting"
+            android:id="@+id/btn_scanner"
             android:layout_width="fill_parent"
             android:layout_height="0dp"
             android:layout_margin="1dp"

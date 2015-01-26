@@ -21,8 +21,6 @@ public class bookHtmlDownloader {
 	private String[] bookHtmlPages;
 	private int pageCount;
 	private StringBuffer bookContentWhole;
-	// a html tag after which the script reference will be injected
-	private final String INJECT_HTML_TAG = "<head>";
 
 	/* Script reference and meta information */
 	private final String JQUERY_REF = "<script src='jquery-1.8.3.js'></script>";
@@ -64,7 +62,7 @@ public class bookHtmlDownloader {
 			
 			if (bookHtmlPages[i] != null) {
 				Log.d(TAG, "Get page" + (i + 1) + "successfully");
-				bookHtmlPages[i] = injectScriptReference(bookHtmlPages[i]);
+				//bookHtmlPages[i] = injectScriptReference(bookHtmlPages[i]);
 				Log.d(TAG,bookHtmlPages[i]);
 			} else {
 				Log.e(TAG, "Get page" + (i + 1) + "failed");
@@ -82,12 +80,17 @@ public class bookHtmlDownloader {
 	 */
 	private String injectScriptReference(String content) {
 
-		int position = content.indexOf(INJECT_HTML_TAG);
-		String part1 = content.substring(0, position+INJECT_HTML_TAG.length());
+		int position = content.indexOf("<head>");
+		String part1 = content.substring(0, position);
 		Log.d(TAG,"substring 1: "+ part1);
-		String part2 = content.substring(position+INJECT_HTML_TAG.length(),content.length());
+		String part2 = content.substring(position,content.length());
 		Log.d(TAG,"substring 2: "+part2);
-		StringBuffer sb = new StringBuffer(part1);
+		
+		//String test = "ddd<head>1234567890</head>sssss";
+		//String[] parts = test.split("</head>", 2);
+		//Log.d(TAG,"part 1: "+ parts[0]);
+		//Log.d(TAG,"part 2: "+ parts[1]);
+		StringBuffer sb = new StringBuffer("");
 		sb.append(JQUERY_REF);
 		sb.append("\n");
 		sb.append(RANGY_REF1);
@@ -100,7 +103,7 @@ public class bookHtmlDownloader {
 		sb.append("\n");
 		sb.append(RANGY_REF5);
 		sb.append("\n");
-		sb.append(part2);
+		sb.append(content);
 		return sb.toString();
 	}
 

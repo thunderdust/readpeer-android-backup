@@ -40,7 +40,7 @@ public class ProfileActivity extends FragmentActivity {
 	private static int TYPE_INT = 2;
 	private static int TYPE_BOOK = 3;
 	private final String STATISTIC_TAG_BOOK = "book";
-	private final String STATISTIC_TAG_FOLLOWER= "follower";
+	private final String STATISTIC_TAG_FOLLOWER = "follower";
 	private final String STATISTIC_TAG_FOLLOWING = "following";
 
 	// private static onlinePictureDownloader mPictureDownloader;
@@ -81,51 +81,55 @@ public class ProfileActivity extends FragmentActivity {
 			e.printStackTrace();
 		}
 	}
-	
-	private void setStatisticModules(){
-		
+
+	private void setStatisticModules() {
+
 		LinearLayout bookCountLL = (LinearLayout) findViewById(R.id.statistic_book);
-		setOnClickListenerForStatisticModules(STATISTIC_TAG_BOOK,bookCountLL);
+		setOnClickListenerForStatisticModules(STATISTIC_TAG_BOOK, bookCountLL);
 		LinearLayout followerCountLL = (LinearLayout) findViewById(R.id.statistic_follower);
-		setOnClickListenerForStatisticModules(STATISTIC_TAG_FOLLOWER,followerCountLL);
+		setOnClickListenerForStatisticModules(STATISTIC_TAG_FOLLOWER,
+				followerCountLL);
 		LinearLayout followingCountLL = (LinearLayout) findViewById(R.id.statistic_following);
-		setOnClickListenerForStatisticModules(STATISTIC_TAG_FOLLOWING,followingCountLL);
+		setOnClickListenerForStatisticModules(STATISTIC_TAG_FOLLOWING,
+				followingCountLL);
 	}
-	
-	private void setOnClickListenerForStatisticModules(String moduleTag,LinearLayout statisticModule){
-		
+
+	private void setOnClickListenerForStatisticModules(String moduleTag,
+			LinearLayout statisticModule) {
+
 		final Bundle newBundle = getUserDataBundle();
-		if (moduleTag.equalsIgnoreCase(STATISTIC_TAG_BOOK)){
-			statisticModule.setOnClickListener(new OnClickListener(){
+		if (moduleTag.equalsIgnoreCase(STATISTIC_TAG_BOOK)) {
+			statisticModule.setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View view) {
 					Log.d(TAG, "book statistic clicked");
-					Intent toBookPage = new Intent(ProfileActivity.this,ProfileBookActivity.class);
+					Intent toBookPage = new Intent(ProfileActivity.this,
+							ProfileBookActivity.class);
 					toBookPage.putExtras(newBundle);
 					startActivity(toBookPage);
 				}
 			});
-		}
-		else if (moduleTag.equalsIgnoreCase(STATISTIC_TAG_FOLLOWER)){
-			statisticModule.setOnClickListener(new OnClickListener(){
+		} else if (moduleTag.equalsIgnoreCase(STATISTIC_TAG_FOLLOWER)) {
+			statisticModule.setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View view) {
 					Log.d(TAG, "follower statistic clicked");
-					Intent toFollowerPage = new Intent(ProfileActivity.this,ProfileFollowerActivity.class);
+					Intent toFollowerPage = new Intent(ProfileActivity.this,
+							ProfileFollowerActivity.class);
 					toFollowerPage.putExtras(newBundle);
 					startActivity(toFollowerPage);
 				}
 			});
-		}
-		else if (moduleTag.equalsIgnoreCase(STATISTIC_TAG_FOLLOWING)){
-			statisticModule.setOnClickListener(new OnClickListener(){
+		} else if (moduleTag.equalsIgnoreCase(STATISTIC_TAG_FOLLOWING)) {
+			statisticModule.setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View view) {
 					Log.d(TAG, "following statistic clicked");
-					Intent toFollowingPage = new Intent(ProfileActivity.this,ProfileFollowingActivity.class);
+					Intent toFollowingPage = new Intent(ProfileActivity.this,
+							ProfileFollowingActivity.class);
 					toFollowingPage.putExtras(newBundle);
 					startActivity(toFollowingPage);
 				}
@@ -234,9 +238,12 @@ public class ProfileActivity extends FragmentActivity {
 				stream.close();
 				return bm;
 			} catch (Exception e) {
-				
-				
-				Log.v("img", e.getMessage());
+
+				String msg = e.getMessage();
+				if (msg != null)
+					Log.v("img", msg);
+				else
+					Log.e(TAG, "msg is null");
 				return bm;
 			}
 		}
