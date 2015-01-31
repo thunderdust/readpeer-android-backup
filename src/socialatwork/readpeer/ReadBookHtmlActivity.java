@@ -75,7 +75,7 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 	 */
 	private final String hightlightAndOffsetSeparator = "_";
 	/* Set to ignore meaningless highlights */
-	private final int HIGHLIGHT_MINIMAL_LENGTH = 6;
+	private final int HIGHLIGHT_MINIMAL_LENGTH = 5;
 
 	// private TextSelectionSupport mTextSelectionSupport;
 
@@ -318,31 +318,54 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 
 		// Requires Jelly bean or later
 		@JavascriptInterface
-		public void sendToAndroid(String text)
-				throws startOffsetNonPositiveException {
+		public void sendToAndroid(String hightlightTextPlusOffset) {
 			// this is called from JS with passed values
-			Log.d(TAG, text);
-			/*
-			 * int separatorIndex = hightlightTextPlusOffset
-			 * .lastIndexOf(hightlightAndOffsetSeparator); String text =
-			 * hightlightTextPlusOffset.substring(0, separatorIndex); Log.d(TAG,
-			 * "text: " + text); String endOffsetString =
-			 * hightlightTextPlusOffset.substring( separatorIndex + 1,
-			 * hightlightTextPlusOffset.length()); Log.d(TAG,
-			 * "endOffsetString: " + endOffsetString + " String length: " +
-			 * endOffsetString.length()); int endOffset =
-			 * Integer.parseInt(endOffsetString);
-			 * 
-			 * if (text.length() >= HIGHLIGHT_MINIMAL_LENGTH) {
-			 * 
-			 * mHighlight = text; int startOffset = endOffset -
-			 * mHighlight.length(); if (startOffset <= 0) { throw new
-			 * startOffsetNonPositiveException(
-			 * "start offset of a highlight cannot be non-positive!"); } else {
-			 * // prepare button action for the highlight menu
-			 * setUpAnnotateButton(mHighlight, startOffset, endOffset); } } else
-			 * { }
-			 */
+			Log.d(TAG, hightlightTextPlusOffset);
+
+			int separatorIndex = hightlightTextPlusOffset
+					.lastIndexOf(hightlightAndOffsetSeparator);
+			String text = hightlightTextPlusOffset.substring(0, separatorIndex);
+			Log.d(TAG, "text: " + text);
+			String endOffsetString = hightlightTextPlusOffset.substring(
+					separatorIndex + 1, hightlightTextPlusOffset.length());
+			int endOffset = Integer.parseInt(endOffsetString);
+			Log.d(TAG, "end offset: " + endOffset);
+
+			if (text.length() >= HIGHLIGHT_MINIMAL_LENGTH) {
+
+				Log.d(TAG, "selection is long enough");
+				mHighlight = text;
+				int startOffset = endOffset - mHighlight.length();
+				Log.d(TAG, "start offset: " + startOffset);
+				if (startOffset <= 0) {
+					// force startOffset at least 0.
+					startOffset = 0;
+					Log.d(TAG, "start is forced to be 0");
+				}
+				// prepare button action for the highlight menu
+				setUpAnnotateButton(mHighlight, startOffset, endOffset);
+			}
+
+			else {
+				Log.d(TAG, "selection too short");
+				final Dialog highlightTooShortAlert = new Dialog(
+						ReadBookHtmlActivity.this, R.style.dialog_bookInfo);
+				highlightTooShortAlert
+						.setContentView(R.layout.dialog_selection_too_short);
+				highlightTooShortAlert.setCancelable(true);
+				highlightTooShortAlert.setCanceledOnTouchOutside(true);
+				highlightTooShortAlert.setTitle("Selection is too short.");
+				Button b = (Button) highlightTooShortAlert
+						.findViewById(R.id.btn_selection_too_short);
+				b.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						if (highlightTooShortAlert != null)
+							highlightTooShortAlert.dismiss();
+					}
+				});
+				highlightTooShortAlert.show();
+			}
 		}
 	}
 
@@ -358,12 +381,8 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 							endOffset);
 				}
 			});
-		}
-	}
-
-	class startOffsetNonPositiveException extends Exception {
-		public startOffsetNonPositiveException(String errorMessage) {
-			super(errorMessage);
+		} else {
+			Log.e(TAG, "highlight dialog is null");
 		}
 	}
 
@@ -435,27 +454,27 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 		jQueryJS += "jQueryScript.src=\"jquery-1.8.3.js\";";
 		jQueryJS += "document.body.appendChild(jQueryScript);";
 		w.loadUrl("javascript:" + jQueryJS);
-		
+
 		String selectionJS = "var selectionScript = document.createElement(\"script\");";
 		selectionJS += "selectionScript.src=\"android.selection.js\";";
 		selectionJS += "document.body.appendChild(selectionScript);";
 		w.loadUrl("javascript:" + selectionJS);
-		
+
 		String rangyJS = "var rangyScript = document.createElement(\"script\");";
 		rangyJS += "rangyScript.src=\"rangy-core.js\";";
 		rangyJS += "document.body.appendChild(rangyScript);";
 		w.loadUrl("javascript:" + rangyJS);
-		
+
 		String rangySerializerJS = "var rsScript = document.createElement(\"script\");";
 		rangySerializerJS += "rsScript.src=\"rangy-serializer.js\";";
 		rangySerializerJS += "document.body.appendChild(rsScript);";
 		w.loadUrl("javascript:" + rangySerializerJS);
-		
+
 		String rangyTextRangeJS = "var rtrScript = document.createElement(\"script\");";
 		rangyTextRangeJS += "rtrScript.src=\"rangy-textrange.js\";";
 		rangyTextRangeJS += "document.body.appendChild(rtrScript);";
 		w.loadUrl("javascript:" + rangyTextRangeJS);
-		
+
 		String rangyHighlighterJS = "var rhScript = document.createElement(\"script\");";
 		rangyHighlighterJS += "rhScript.src=\"rangy-textrange.js\";";
 		rangyHighlighterJS += "document.body.appendChild(rhScript);";

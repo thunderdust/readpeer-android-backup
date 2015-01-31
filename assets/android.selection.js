@@ -113,6 +113,7 @@ android.selection.getSelectionOffset = function(){
         
         var caretOffset = getCaretCharacterOffsetWithin(el);
         console.log('finish calculating caret offset');
+        console.log(caretOffset);
         var range = sel.getRangeAt(0);
         //var start_offset = range.startOffset;
         //var end_offset = range.endOffset;
