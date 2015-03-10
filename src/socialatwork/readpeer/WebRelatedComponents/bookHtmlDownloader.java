@@ -23,12 +23,13 @@ public class bookHtmlDownloader {
 	private StringBuffer bookContentWhole;
 
 	/* Script reference and meta information */
-	private final String JQUERY_REF = "<script src='jquery-1.8.3.js'></script>";
-	private final String RANGY_REF1 = "<script src='rangy-core.js'></script>";
-	private final String RANGY_REF2 = "<script src='rangy-serializer.js'></script>";
-	private final String RANGY_REF3 = "<script src='rangy-textrange.js'></script>";
-	private final String RANGY_REF4 = "<script src='android.selection.js'></script>";
-	private final String RANGY_REF5 = "<script src='rangy-highlighter.js'></script>";
+	//private final String JQUERY_REF = "<script src='jquery-1.8.3.js'></script>";
+	//private final String RANGY_REF1 = "<script src='rangy-core.js'></script>";
+	//private final String RANGY_REF2 = "<script src='rangy-serializer.js'></script>";
+	//private final String RANGY_REF3 = "<script src='rangy-textrange.js'></script>";
+	//private final String RANGY_REF4 = "<script src='android.selection.js'></script>";
+	//private final String RANGY_REF5 = "<script src='rangy-highlighter.js'></script>";
+	private final String HIGHLIGHTER_REF = "<script src='annotation.js'></script>";
 	
 
 	// 'Synchronized' is to ensure there is only one instance
@@ -91,17 +92,19 @@ public class bookHtmlDownloader {
 		//Log.d(TAG,"part 1: "+ parts[0]);
 		//Log.d(TAG,"part 2: "+ parts[1]);
 		StringBuffer sb = new StringBuffer("");
-		sb.append(JQUERY_REF);
-		sb.append("\n");
-		sb.append(RANGY_REF1);
-		sb.append("\n");
-		sb.append(RANGY_REF2);
-		sb.append("\n");
-		sb.append(RANGY_REF3);
-		sb.append("\n");
-		sb.append(RANGY_REF4);
-		sb.append("\n");
-		sb.append(RANGY_REF5);
+		//sb.append(JQUERY_REF);
+		//sb.append("\n");
+		//sb.append(RANGY_REF1);
+		//sb.append("\n");
+		//sb.append(RANGY_REF2);
+		//sb.append("\n");
+		//sb.append(RANGY_REF3);
+		//sb.append("\n");
+		//sb.append(RANGY_REF4);
+		//sb.append("\n");
+		//sb.append(RANGY_REF5);
+		//sb.append("\n");
+		sb.append(HIGHLIGHTER_REF);
 		sb.append("\n");
 		sb.append(content);
 		return sb.toString();

@@ -101,8 +101,8 @@ android.selection.getSelectionOffset = function(){
             console.log('window has selection');
         }
 
-        
-        el = document.getElementById("page1-div");
+        var containerElementSet = document.getElementsByClassName("pf w0 h0");
+        el = containerElementSet[0];
         if (!el){
             console.log('specified element not found');
             return;
@@ -328,3 +328,6 @@ android.selection.selectBetweenHandles = function(startCaret, endCaret) {
         window.TextSelection.jsError(e);
     }
 };
+
+
+

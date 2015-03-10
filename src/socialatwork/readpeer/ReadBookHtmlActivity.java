@@ -1,10 +1,16 @@
 package socialatwork.readpeer;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -29,6 +35,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -101,20 +108,39 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 					}
 					// the id of container div in current html page, a necessary
 					// element for computing selection offset
-					final String currentContainerDivID = "page"
-							+ mHtmlPageIndex + "-div";
-					Log.d(TAG, "current container div id: "
-							+ currentContainerDivID);
+					/*
+					 * final String currentContainerDivID = "page" +
+					 * mHtmlPageIndex + "-div"; Log.d(TAG,
+					 * "current container div id: " + currentContainerDivID);
+					 */
 					Log.d(TAG, "about to load javascript");
 
 					mWebView.post(new Runnable() {
 						@TargetApi(19)
 						@Override
 						public void run() {
-
 							mWebView.evaluateJavascript(
-									"javascript:android.selection.getSelectionOffset()",
-									null);
+									"javascript:annotation.highlight_selected_text()",
+									new ValueCallback<String>(){
+
+										@Override
+										public void onReceiveValue(String highlightJSON) {
+											try {
+												JSONObject jobj = new JSONObject(highlightJSON);
+												Log.d(TAG, highlightJSON);
+												String startIndex = jobj.get("start").toString();
+												Log.d(TAG,"start:" + startIndex);
+												String endIndex = jobj.get("end").toString();
+												Log.d(TAG,"end:" + endIndex);
+												String text = jobj.get("text").toString();
+												Log.d(TAG,"text:" + text);
+												
+											} catch (JSONException e) {
+												e.printStackTrace();
+											}
+											
+										}
+									});
 						}
 					});
 					return true;
@@ -338,40 +364,50 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 				int startOffset = endOffset - mHighlight.length();
 				Log.d(TAG, "start offset: " + startOffset);
 				if (startOffset <= 0) {
-					// force startOffset at least 0.
-					startOffset = 0;
-					Log.d(TAG, "start is forced to be 0");
-				}
-				// prepare button action for the highlight menu
-				setUpAnnotateButton(mHighlight, startOffset, endOffset);
-			}
-
-			else {
-				Log.d(TAG, "selection too short");
-				final Dialog highlightTooShortAlert = new Dialog(
-						ReadBookHtmlActivity.this, R.style.dialog_bookInfo);
-				highlightTooShortAlert
-						.setContentView(R.layout.dialog_selection_too_short);
-				highlightTooShortAlert.setCancelable(true);
-				highlightTooShortAlert.setCanceledOnTouchOutside(true);
-				highlightTooShortAlert.setTitle("Selection is too short.");
-				Button b = (Button) highlightTooShortAlert
-						.findViewById(R.id.btn_selection_too_short);
-				b.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						if (highlightTooShortAlert != null)
-							highlightTooShortAlert.dismiss();
+					// discard this annotation
+					Log.e(TAG, "start is negative");
+					startAnnotationMessageDialog("Failed annotation is discarded");
+				} else {
+					// prepare button action for the highlight dialog
+					setUpAnnotateDialog(mHighlight, startOffset, endOffset);
+					// fire the highlight dialog
+					if (mHighlightDialog != null) {
+						mHighlightDialog.show();
 					}
-				});
-				highlightTooShortAlert.show();
+				}
+			} else {
+				Log.d(TAG, "selection too short");
+				startAnnotationMessageDialog("selection too short");
 			}
 		}
 	}
 
-	private void setUpAnnotateButton(final String mHighlight,
+	private void startAnnotationMessageDialog(String msg) {
+
+		final Dialog highlightTooShortAlert = new Dialog(
+				ReadBookHtmlActivity.this, R.style.dialog_bookInfo);
+		highlightTooShortAlert
+				.setContentView(R.layout.dialog_selection_too_short);
+		highlightTooShortAlert.setCancelable(true);
+		highlightTooShortAlert.setCanceledOnTouchOutside(true);
+		highlightTooShortAlert.setTitle(msg);
+		Button b = (Button) highlightTooShortAlert
+				.findViewById(R.id.btn_selection_too_short);
+		b.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (highlightTooShortAlert != null)
+					highlightTooShortAlert.dismiss();
+			}
+		});
+		highlightTooShortAlert.show();
+	}
+
+	private void setUpAnnotateDialog(final String mHighlight,
 			final int startOffset, final int endOffset) {
+		Log.d(TAG, "Setting up annotation button");
 		if (mHighlightDialog != null) {
+			Log.d(TAG, "highlight dialog is NOT null");
 			Button annotateBtn = (Button) mHighlightDialog
 					.findViewById(R.id.btn_annotate);
 			annotateBtn.setOnClickListener(new View.OnClickListener() {
@@ -381,6 +417,7 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 							endOffset);
 				}
 			});
+
 		} else {
 			Log.e(TAG, "highlight dialog is null");
 		}
@@ -388,6 +425,7 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 
 	private void fireNewAnnotationFragment(String highlightedText,
 			int startOffset, int endOffset) {
+		Log.d(TAG, "Ready to fire new annotation fragment");
 		Intent toNewAnnotation = new Intent(this, AnnotationActivity.class);
 		toNewAnnotation.putExtra("highlight", highlightedText);
 		toNewAnnotation.putExtra("bid", mBookIndex);
@@ -436,50 +474,43 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 			public void onPageFinished(WebView view, String url) {
 				super.onPageFinished(view, url);
 				Log.d(TAG, "page is loaded");
+				
+				/*String jsContent = "";
+				/*
 				try {
 					loadAnnotatingJSFiles(view);
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
+				
+				try{
+					InputStream is = getApplicationContext().getAssets().open("annotation.js");
+					InputStreamReader isr = new InputStreamReader(is);
+					BufferedReader br = new BufferedReader(isr);
+					String line;
+					while ((line = br.readLine())!=null){
+						Log.d(TAG,"line is not NULL");
+						jsContent += line;
+					}
+					is.close();
+				}
+				catch(Exception e){}
+				view.loadUrl("javascript:("+jsContent + ")()");
+			*/
 			}
 		});
 		mWebView.loadUrl(assetPath);
-		// mWebView.loadUrl(absolutePath);
+		//mWebView.loadUrl(absolutePath);
 	}
 
 	// Load a webview with essential javascript files to enable annotating
 	public void loadAnnotatingJSFiles(WebView w) throws MalformedURLException {
 
-		String jQueryJS = "var jQueryScript = document.createElement(\"script\");";
-		jQueryJS += "jQueryScript.src=\"jquery-1.8.3.js\";";
-		jQueryJS += "document.body.appendChild(jQueryScript);";
-		w.loadUrl("javascript:" + jQueryJS);
-
-		String selectionJS = "var selectionScript = document.createElement(\"script\");";
-		selectionJS += "selectionScript.src=\"android.selection.js\";";
-		selectionJS += "document.body.appendChild(selectionScript);";
-		w.loadUrl("javascript:" + selectionJS);
-
-		String rangyJS = "var rangyScript = document.createElement(\"script\");";
-		rangyJS += "rangyScript.src=\"rangy-core.js\";";
-		rangyJS += "document.body.appendChild(rangyScript);";
-		w.loadUrl("javascript:" + rangyJS);
-
-		String rangySerializerJS = "var rsScript = document.createElement(\"script\");";
-		rangySerializerJS += "rsScript.src=\"rangy-serializer.js\";";
-		rangySerializerJS += "document.body.appendChild(rsScript);";
-		w.loadUrl("javascript:" + rangySerializerJS);
-
-		String rangyTextRangeJS = "var rtrScript = document.createElement(\"script\");";
-		rangyTextRangeJS += "rtrScript.src=\"rangy-textrange.js\";";
-		rangyTextRangeJS += "document.body.appendChild(rtrScript);";
-		w.loadUrl("javascript:" + rangyTextRangeJS);
-
-		String rangyHighlighterJS = "var rhScript = document.createElement(\"script\");";
-		rangyHighlighterJS += "rhScript.src=\"rangy-textrange.js\";";
-		rangyHighlighterJS += "document.body.appendChild(rhScript);";
-		w.loadUrl("javascript:" + rangyHighlighterJS);
-
+		Log.d(TAG, "Loading annotation javascripts");
+		String highlighterJS = "var script = document.createElement(\"script\");";
+		highlighterJS += "script.src=\"annotation.js\";";
+		highlighterJS += "document.body.appendChild(script);";
+		w.loadUrl("javascript:" + highlighterJS);
 	}
 
 	private void setWebViewList(int startPageIndex, int windowSize) {
