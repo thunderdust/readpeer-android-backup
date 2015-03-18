@@ -12,25 +12,36 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import socialatwork.readpeer.Fragments.AnnotationFragment;
+import socialatwork.readpeer.Fragments.AnnotationFragment.OnAnnotationSelectedListener;
+import socialatwork.readpeer.ReadView.NegativeLineNumberException;
+
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.BackgroundColorSpan;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
+import android.view.View.OnClickListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -41,8 +52,11 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.SeekBar;
+import android.widget.TextView;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 
-public class ReadBookHtmlActivity extends FragmentActivity {
+public class ReadBookHtmlActivity extends FragmentActivity implements OnAnnotationSelectedListener{
 
 	private static WebView mWebView;
 	private final String TAG = "Read Book Html";
@@ -106,39 +120,24 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 					if (mWebView == null) {
 						mWebView = getCurrentWebView();
 					}
-					// the id of container div in current html page, a necessary
-					// element for computing selection offset
-					/*
-					 * final String currentContainerDivID = "page" +
-					 * mHtmlPageIndex + "-div"; Log.d(TAG,
-					 * "current container div id: " + currentContainerDivID);
-					 */
 					Log.d(TAG, "about to load javascript");
-
 					mWebView.post(new Runnable() {
 						@TargetApi(19)
 						@Override
 						public void run() {
 							mWebView.evaluateJavascript(
 									"javascript:annotation.highlight_selected_text()",
-									new ValueCallback<String>(){
+									new ValueCallback<String>() {
 
 										@Override
-										public void onReceiveValue(String highlightJSON) {
-											try {
-												JSONObject jobj = new JSONObject(highlightJSON);
-												Log.d(TAG, highlightJSON);
-												String startIndex = jobj.get("start").toString();
-												Log.d(TAG,"start:" + startIndex);
-												String endIndex = jobj.get("end").toString();
-												Log.d(TAG,"end:" + endIndex);
-												String text = jobj.get("text").toString();
-												Log.d(TAG,"text:" + text);
-												
-											} catch (JSONException e) {
-												e.printStackTrace();
+										public void onReceiveValue(
+												String highlightJSON) {
+											if (highlightJSON != null) {
+												annotateHighlight(highlightJSON);
+											} else {
+												Log.e(TAG,
+														"highlight information is not returned");
 											}
-											
 										}
 									});
 						}
@@ -149,6 +148,120 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 		}
 		super.onActionModeStarted(m);
 	}
+
+	private void annotateHighlight(String highlightJSON) {
+		try {
+			JSONObject jobj = new JSONObject(highlightJSON);
+			Log.d(TAG, highlightJSON);
+			String text = jobj.get("text").toString();
+			Log.d(TAG, "text:" + text);
+			int startOffset = Integer.parseInt(jobj.get("start").toString());
+			Log.d(TAG, "start offset: " + startOffset);
+			int endOffset = Integer.parseInt(jobj.get("end").toString());
+			Log.d(TAG, "end offset: " + endOffset);
+			if (text.length() >= HIGHLIGHT_MINIMAL_LENGTH) {
+
+				Log.d(TAG, "selection is long enough");
+				mHighlight = text;
+				if (startOffset < 0) {
+					// discard this
+					// annotation
+					Log.e(TAG, "start is negative");
+					startAnnotationMessageDialog("Failed annotation is discarded");
+				} else {
+					/*
+					 * prepare button action for the highlight dialog
+					 */
+					setUpAnnotateDialog(mHighlight, startOffset, endOffset);
+					// fire the highlight
+					// dialog
+					if (mHighlightDialog != null) {
+						mHighlightDialog.show();
+					}
+				}
+			} else {
+				Log.d(TAG, "selection too short");
+				startAnnotationMessageDialog("selection too short");
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	@Override
+	public void onAnnotationSelected(int startIndex, int endIndex) {
+		// loadPage(startIndex);
+		/*
+		readView = (ReadView) findViewById(R.id.readview);
+		annotationSpan = new SpannableStringBuilder(readView.getText());
+		annotationSpan.clearSpans();
+		annotationSpan.setSpan(new BackgroundColorSpan(Color.GREEN),
+				startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		readView.setText(annotationSpan);
+
+		int verticalPosition = mObservableScrollView.getScrollY();
+		Log.d(TAG, "verticalPosition:" + verticalPosition);
+
+		int currentLineOnTop = readView.getLayout().getLineForVertical(
+				verticalPosition);
+		Log.d(TAG, "current line on top:" + currentLineOnTop);
+		int CharCountAbove = readView.getCharCountByEndOfLine(currentLineOnTop);
+
+		int accumulatedCharCount = CharCountAbove;
+		Log.d(TAG, "char count above:" + CharCountAbove);
+		Log.d(TAG, "start index:" + startIndex);
+		int updatedLineNum = currentLineOnTop;
+
+		if (startIndex >= CharCountAbove) {
+			Log.d(TAG, "roll ahead");
+			while (startIndex >= accumulatedCharCount) {
+				updatedLineNum++;
+				try {
+					accumulatedCharCount += readView
+							.getCharNumInLine(updatedLineNum);
+				} catch (NegativeLineNumberException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			int linesToAdd = updatedLineNum - currentLineOnTop;
+			final float scrollOffset = linesToAdd * readView.getLineHeight();
+			Log.d(TAG, "OFFSET:" + scrollOffset);
+			mObservableScrollView.post(new Runnable() {
+				@Override
+				public void run() {
+					mObservableScrollView.scrollBy(0, (int) scrollOffset);
+				}
+			});
+		}
+
+		else {
+			Log.d(TAG, "roll back");
+			while (startIndex < accumulatedCharCount) {
+
+				updatedLineNum--;
+				try {
+					accumulatedCharCount -= readView
+							.getCharNumInLine(updatedLineNum);
+				} catch (NegativeLineNumberException e) {
+					e.printStackTrace();
+				}
+			}
+			int linesToSub = currentLineOnTop - updatedLineNum;
+			final float scrollOffset = linesToSub * readView.getLineHeight();
+			Log.d(TAG, "OFFSET:" + scrollOffset);
+			mObservableScrollView.post(new Runnable() {
+				@Override
+				public void run() {
+					mObservableScrollView.scrollBy(0, (int) scrollOffset);
+				}
+			});
+		}
+		*/
+
+	}
+	
 
 	public WebView getCurrentWebView() {
 
@@ -170,8 +283,125 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 	}
 
 	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.read_book, menu);
+		return true;
+	}
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		Log.d(TAG, "options menu item selected");
+
+		switch (item.getItemId()) {
+		// action with ID action_refresh was selected
+		case R.id.show_annotation:
+
+			FragmentManager fm = getSupportFragmentManager();
+			// if open annotation container
+			if (fm.findFragmentById(R.id.annotationFragmentContainer) == null) {
+				Log.d(TAG,"annotation fragment is NULL");
+
+				// Record current reading position
+				Fragment annotationFragment = fm
+						.findFragmentById(R.id.annotationFragmentContainer);
+				if (annotationFragment == null) {
+					annotationFragment = new AnnotationFragment();
+				}
+				Bundle annotationBundle = new Bundle();
+				annotationBundle.putString("access_token", access_token);
+				annotationBundle.putString("bookIndex", mBookIndex);
+				annotationBundle.putString("uid", mUid);
+				annotationFragment.setArguments(annotationBundle);
+				fm.beginTransaction()
+						.add(android.R.id.content,
+								annotationFragment).commit();
+				item.setTitle("Close Annotation");
+				item.setIcon(getResources().getDrawable(
+						R.drawable.btn_close_annotation));
+				// Close annotation container
+			} else {
+				Log.d(TAG,"fragment already exists, Close annotation fragment");
+				fm.beginTransaction()
+						.remove(fm
+								.findFragmentById(R.id.annotationFragmentContainer))
+						.commit();
+				item.setTitle("Show Annotation");
+				item.setIcon(getResources().getDrawable(
+						R.drawable.btn_show_annotation));
+				// remove all highlights
+				Log.d(TAG, "about to load javascript");
+				mWebView.post(new Runnable() {
+					@TargetApi(19)
+					@Override
+					public void run() {
+						mWebView.evaluateJavascript(
+								"javascript:annotation.remove_all_highlights()",
+								null);
+					}
+				});
+				
+				// loadPage(positionBefore);
+				// readView.removeSelection();
+				// annotationSpan = new
+				// SpannableStringBuilder(readView.getText());
+				// annotationSpan.clearSpans();
+				// readView.setText(annotationSpan);
+				/*
+				 * mObservableScrollView.post(new Runnable() {
+				 * 
+				 * @Override public void run() {
+				 * mObservableScrollView.scrollTo(0, positionCopy); } });
+				 */
+			}
+			break;
+
+		case R.id.font_change:
+
+			/*
+			 * mFontDialog = new Dialog(this);
+			 * mFontDialog.setContentView(R.layout.font_dialog);
+			 * mFontDialog.setTitle(R.string.title_font_dialog); // record
+			 * current font size final int ORIGINAL_FONT_SIZE =
+			 * CURRENT_FONT_SIZE; positionCopy =
+			 * mObservableScrollView.getScrollY();
+			 * 
+			 * // Set the font size control panel Button confirmBtn = (Button)
+			 * mFontDialog .findViewById(R.id.font_dialog_confirm);
+			 * confirmBtn.setOnClickListener(new OnClickListener() {
+			 * 
+			 * @Override public void onClick(View v) { mFontDialog.dismiss();
+			 * setText(); loadPage(positionCopy); } }); Button cancelBtn =
+			 * (Button) mFontDialog .findViewById(R.id.font_dialog_cancel);
+			 * cancelBtn.setOnClickListener(new OnClickListener() {
+			 * 
+			 * @Override public void onClick(View v) { CURRENT_FONT_SIZE =
+			 * ORIGINAL_FONT_SIZE; mFontDialog.dismiss(); } }); final TextView
+			 * fontSizeText = (TextView) mFontDialog
+			 * .findViewById(R.id.font_size_textview);
+			 * fontSizeText.setText(Integer.toString(CURRENT_FONT_SIZE));
+			 * 
+			 * SeekBar fontSizeSeek = (SeekBar) mFontDialog
+			 * .findViewById(R.id.font_dialog_seekbar);
+			 * fontSizeSeek.setMax(MAX_FONT_SIZE - MIN_FONT_SIZE);
+			 * fontSizeSeek.setProgress(CURRENT_FONT_SIZE - MIN_FONT_SIZE);
+			 * fontSizeSeek .setOnSeekBarChangeListener(new
+			 * OnSeekBarChangeListener() {
+			 * 
+			 * @Override public void onProgressChanged(SeekBar seekBar, int
+			 * progress, boolean fromUser) { int fontSize = progress +
+			 * MIN_FONT_SIZE; fontSizeText.setText(Integer.toString(fontSize));
+			 * }
+			 * 
+			 * @Override public void onStartTrackingTouch(SeekBar seekBar) { }
+			 * 
+			 * @Override public void onStopTrackingTouch(SeekBar seekBar) { int
+			 * progress = seekBar.getProgress(); CURRENT_FONT_SIZE = progress +
+			 * MIN_FONT_SIZE; } }); // Set font/paper color change control
+			 * buttons setColorModeButtons(); mFontDialog.show(); break;
+			 */
+		default:
+			break;
+		}
 		return true;
 	}
 
@@ -338,49 +568,37 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 		return width;
 	}
 
-	final class myJavascriptHandler {
-		myJavascriptHandler() {
-		}
-
-		// Requires Jelly bean or later
-		@JavascriptInterface
-		public void sendToAndroid(String hightlightTextPlusOffset) {
-			// this is called from JS with passed values
-			Log.d(TAG, hightlightTextPlusOffset);
-
-			int separatorIndex = hightlightTextPlusOffset
-					.lastIndexOf(hightlightAndOffsetSeparator);
-			String text = hightlightTextPlusOffset.substring(0, separatorIndex);
-			Log.d(TAG, "text: " + text);
-			String endOffsetString = hightlightTextPlusOffset.substring(
-					separatorIndex + 1, hightlightTextPlusOffset.length());
-			int endOffset = Integer.parseInt(endOffsetString);
-			Log.d(TAG, "end offset: " + endOffset);
-
-			if (text.length() >= HIGHLIGHT_MINIMAL_LENGTH) {
-
-				Log.d(TAG, "selection is long enough");
-				mHighlight = text;
-				int startOffset = endOffset - mHighlight.length();
-				Log.d(TAG, "start offset: " + startOffset);
-				if (startOffset <= 0) {
-					// discard this annotation
-					Log.e(TAG, "start is negative");
-					startAnnotationMessageDialog("Failed annotation is discarded");
-				} else {
-					// prepare button action for the highlight dialog
-					setUpAnnotateDialog(mHighlight, startOffset, endOffset);
-					// fire the highlight dialog
-					if (mHighlightDialog != null) {
-						mHighlightDialog.show();
-					}
-				}
-			} else {
-				Log.d(TAG, "selection too short");
-				startAnnotationMessageDialog("selection too short");
-			}
-		}
-	}
+	/*
+	 * final class myJavascriptHandler { myJavascriptHandler() { }
+	 * 
+	 * // Requires Jelly bean or later
+	 * 
+	 * @JavascriptInterface public void sendToAndroid(String
+	 * hightlightTextPlusOffset) { // this is called from JS with passed values
+	 * Log.d(TAG, hightlightTextPlusOffset);
+	 * 
+	 * int separatorIndex = hightlightTextPlusOffset
+	 * .lastIndexOf(hightlightAndOffsetSeparator); String text =
+	 * hightlightTextPlusOffset.substring(0, separatorIndex); Log.d(TAG,
+	 * "text: " + text); String endOffsetString =
+	 * hightlightTextPlusOffset.substring( separatorIndex + 1,
+	 * hightlightTextPlusOffset.length()); int endOffset =
+	 * Integer.parseInt(endOffsetString); Log.d(TAG, "end offset: " +
+	 * endOffset);
+	 * 
+	 * if (text.length() >= HIGHLIGHT_MINIMAL_LENGTH) {
+	 * 
+	 * Log.d(TAG, "selection is long enough"); mHighlight = text; int
+	 * startOffset = endOffset - mHighlight.length(); Log.d(TAG,
+	 * "start offset: " + startOffset); if (startOffset <= 0) { // discard this
+	 * annotation Log.e(TAG, "start is negative");
+	 * startAnnotationMessageDialog("Failed annotation is discarded"); } else {
+	 * // prepare button action for the highlight dialog
+	 * setUpAnnotateDialog(mHighlight, startOffset, endOffset); // fire the
+	 * highlight dialog if (mHighlightDialog != null) { mHighlightDialog.show();
+	 * } } } else { Log.d(TAG, "selection too short");
+	 * startAnnotationMessageDialog("selection too short"); } } }
+	 */
 
 	private void startAnnotationMessageDialog(String msg) {
 
@@ -435,6 +653,9 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 		toNewAnnotation.putExtra("pid", mPageIndex);
 		toNewAnnotation.putExtra("start", startOffset);
 		toNewAnnotation.putExtra("end", endOffset);
+		if (mHighlightDialog != null) {
+			mHighlightDialog.dismiss();
+		}
 		startActivity(toNewAnnotation);
 	}
 
@@ -444,6 +665,8 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 		mWebView.loadUrl("about:blank");
 		WebSettings webSettings = mWebView.getSettings();
 		webSettings.setJavaScriptEnabled(true);
+		// Turn off hardware acceleration
+		mWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
 		// Enable zoom in zoom out
 		mWebView.getSettings().setUseWideViewPort(true);
@@ -463,9 +686,8 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 				+ mHtmlFileNameList.get(filePathIndex);
 		Log.d(TAG, "asset path:" + assetPath);
 
-		mWebView.addJavascriptInterface(new myJavascriptHandler(),
-				"valueCallback");
-
+		// mWebView.addJavascriptInterface(new
+		// myJavascriptHandler(),"valueCallback");
 		mWebView.setWebChromeClient(new WebChromeClient());
 
 		// Load annotating javascripts after html load is done
@@ -474,43 +696,39 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 			public void onPageFinished(WebView view, String url) {
 				super.onPageFinished(view, url);
 				Log.d(TAG, "page is loaded");
-				
-				/*String jsContent = "";
+				// loadAnnotatingJSFiles(view);
+
 				/*
-				try {
-					loadAnnotatingJSFiles(view);
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
-				
-				try{
-					InputStream is = getApplicationContext().getAssets().open("annotation.js");
-					InputStreamReader isr = new InputStreamReader(is);
-					BufferedReader br = new BufferedReader(isr);
-					String line;
-					while ((line = br.readLine())!=null){
-						Log.d(TAG,"line is not NULL");
-						jsContent += line;
-					}
-					is.close();
-				}
-				catch(Exception e){}
-				view.loadUrl("javascript:("+jsContent + ")()");
-			*/
+				 * String jsContent = ""; /* try { loadAnnotatingJSFiles(view);
+				 * } catch (MalformedURLException e) { e.printStackTrace(); }
+				 * 
+				 * try{ InputStream is =
+				 * getApplicationContext().getAssets().open("annotation.js");
+				 * InputStreamReader isr = new InputStreamReader(is);
+				 * BufferedReader br = new BufferedReader(isr); String line;
+				 * while ((line = br.readLine())!=null){
+				 * Log.d(TAG,"line is not NULL"); jsContent += line; }
+				 * is.close(); } catch(Exception e){}
+				 * view.loadUrl("javascript:("+jsContent + ")()");
+				 */
 			}
 		});
-		mWebView.loadUrl(assetPath);
-		//mWebView.loadUrl(absolutePath);
+		//mWebView.loadUrl(assetPath);
+		// loadAnnotatingJSFiles(mWebView);
+		mWebView.loadUrl(absolutePath);
 	}
 
 	// Load a webview with essential javascript files to enable annotating
-	public void loadAnnotatingJSFiles(WebView w) throws MalformedURLException {
+	private void loadAnnotatingJSFiles(WebView w) {
 
 		Log.d(TAG, "Loading annotation javascripts");
-		String highlighterJS = "var script = document.createElement(\"script\");";
-		highlighterJS += "script.src=\"annotation.js\";";
-		highlighterJS += "document.body.appendChild(script);";
-		w.loadUrl("javascript:" + highlighterJS);
+		String injectJSURL = "javascript:(function(){"
+				+ "var script = document.createElement(\"script\");"
+				+ "script.type='text/javascript';"
+				+ "script.src=\"annotation.js\";"
+				+ "document.getElementsByTagName('head').item(0).appendChild(script);"
+				+ "})()";
+		w.loadUrl(injectJSURL);
 	}
 
 	private void setWebViewList(int startPageIndex, int windowSize) {
@@ -620,13 +838,6 @@ public class ReadBookHtmlActivity extends FragmentActivity {
 		} else
 			return null;
 		return null;
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.read_book, menu);
-		return true;
 	}
 
 	/* start --- View Pager Settings and Attributes --- */

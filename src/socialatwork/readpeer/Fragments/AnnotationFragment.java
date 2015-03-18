@@ -187,6 +187,7 @@ public class AnnotationFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		Log.d(TAG,"On create view");
 
 		if (view == null) {
 			view = inflater.inflate(R.layout.fragment_annotation, container,
@@ -196,6 +197,12 @@ public class AnnotationFragment extends Fragment {
 		ViewGroup parent = (ViewGroup) view.getParent();
 		if (parent != null) {
 			parent.removeView(view);
+		}
+		if (view!=null){
+			Log.d(TAG,"rendered view is not null");
+		}
+		else{
+			Log.d(TAG,"rendered view is NULL");
 		}
 		return view;
 	}

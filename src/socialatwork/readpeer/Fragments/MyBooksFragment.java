@@ -2,6 +2,9 @@ package socialatwork.readpeer.Fragments;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -61,6 +64,7 @@ public class MyBooksFragment extends Fragment {
 	private int readingCountOnServer;
 	private String readingBooksInfo;
 	boolean isUserBookDeletedOnServer = false;
+	// boolean isServerBookDeletionTaskFinished = false;
 
 	private static int myBookNum = 0;
 	private ProgressDialog dialog = null;
@@ -158,7 +162,7 @@ public class MyBooksFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		//Log.d(TAG, "on create view");
+		// Log.d(TAG, "on create view");
 		if (view == null) {
 			view = inflater.inflate(R.layout.fragment_mybook, container, false);
 		}
@@ -207,7 +211,7 @@ public class MyBooksFragment extends Fragment {
 		double diagonalPixels = Math.sqrt((Math.pow(dm.widthPixels, 2) + Math
 				.pow(dm.heightPixels, 2)));
 		double screenSize = diagonalPixels / (160 * dm.density);
-		Log.d(TAG, "getScreenSize() physical size£º " + screenSize);
+		Log.d(TAG, "getScreenSize() physical size:" + screenSize);
 
 		if (screenSize > 6) {
 			// tablet
@@ -231,8 +235,10 @@ public class MyBooksFragment extends Fragment {
 				if (index >= myBookNum) {
 
 				} else {
-					//Intent openBookIntent = new Intent(getActivity(),ReadBookActivity.class);
-					Intent openBookHtmlIntent = new Intent(getActivity(),ReadBookHtmlActivity.class);
+					// Intent openBookIntent = new
+					// Intent(getActivity(),ReadBookActivity.class);
+					Intent openBookHtmlIntent = new Intent(getActivity(),
+							ReadBookHtmlActivity.class);
 					openBookHtmlIntent.putExtra("bid", bookID);
 					openBookHtmlIntent.putExtra("uid", uid);
 					openBookHtmlIntent.putExtra("access_token", access_token);
@@ -273,7 +279,19 @@ public class MyBooksFragment extends Fragment {
 
 					@Override
 					public void onClick(View arg0) {
-						boolean isDeleted = deleteALocalBook(bookTitle, bookID);
+						boolean isDeleted = false;
+						try {
+							isDeleted = deleteALocalBook(bookTitle, bookID);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (ExecutionException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (TimeoutException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 						if (isDeleted) {
 							bookNames.remove(index);
 							bookIDs.remove(index);
@@ -286,7 +304,6 @@ public class MyBooksFragment extends Fragment {
 						}
 					}
 				});
-
 				Button favoriteBtn = (Button) bookManageDialog
 						.findViewById(R.id.btn_add_to_favorite);
 				Drawable iconFavorite = getResources().getDrawable(
@@ -294,13 +311,11 @@ public class MyBooksFragment extends Fragment {
 				favoriteBtn.setCompoundDrawablesWithIntrinsicBounds(
 						iconFavorite, null, null, null);
 				favoriteBtn.setOnClickListener(new OnClickListener() {
-
 					@Override
 					public void onClick(View v) {
 
 					}
 				});
-
 				bookManageDialog.show();
 				return true;
 			}
@@ -322,9 +337,9 @@ public class MyBooksFragment extends Fragment {
 			}
 		}, 1500L);
 	}
-	
-	private void updateLocalBookInfoByScanningDisk(){
-		
+
+	private void updateLocalBookInfoByScanningDisk() {
+
 		/* Reset data for reloading */
 		bookNames.clear();
 		bookIDs.clear();
@@ -333,15 +348,15 @@ public class MyBooksFragment extends Fragment {
 		File[] fileList = getLocalBookFiles();
 		if (fileList != null) {
 			myBookNum = fileList.length;
-			Log.d(TAG,"book number:"+myBookNum);
+			Log.d(TAG, "book number:" + myBookNum);
 		} else {
 			myBookNum = 0;
 		}
-		
+
 		for (int i = 0; i < myBookNum; i++) {
 			// book index is in between "- -" of the file name
 			String fileName = fileList[i].getName();
-			//Log.d(TAG,"fileName:"+fileName);
+			// Log.d(TAG,"fileName:"+fileName);
 			String bookIndex = fileName.split("-")[0];
 			String bookName = fileName.split("-")[1];
 			bookNames.add(bookName);
@@ -452,15 +467,17 @@ public class MyBooksFragment extends Fragment {
 	}
 
 	// Delete a book from local storage -> update user's library on server side
-	private boolean deleteALocalBook(String bookName, final String bookID) {
+	private boolean deleteALocalBook(String bookName, final String bookID)
+			throws TimeoutException, InterruptedException, ExecutionException {
 
 		// delete from server side first
 		// use global boolean <isUserBookDeletedOnServer> to indicate if
 		// deletion is successful
-		new deleteUserBookOnServerTask().execute(bookID);
+		deleteUserBookOnServerTask newDeletionTask = new deleteUserBookOnServerTask();
+		newDeletionTask.execute(bookID);
+		newDeletionTask.get(1000, TimeUnit.MILLISECONDS);
 		if (isUserBookDeletedOnServer) {
-			// Reset the global boolean value
-			isUserBookDeletedOnServer = false;
+			Log.d(TAG, "book on server is deleted");
 			if (Environment.getExternalStorageState().equals(
 					android.os.Environment.MEDIA_MOUNTED)) {
 				String storagePath = Environment.getExternalStorageDirectory()
@@ -538,7 +555,7 @@ public class MyBooksFragment extends Fragment {
 					.findViewById(R.id.bookCoverImageView);
 			tView.setTextColor(Color.WHITE);
 
-			//Log.i(TAG, "position:" + Integer.toString(position));
+			// Log.i(TAG, "position:" + Integer.toString(position));
 			if (bookNames.size() > position) {
 				String bookTitle = bookNames.get(position);
 				setTitleTextSize(tView, bookTitle);

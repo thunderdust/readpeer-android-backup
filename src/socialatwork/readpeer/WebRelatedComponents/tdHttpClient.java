@@ -18,6 +18,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -217,6 +218,7 @@ public class tdHttpClient {
 			String bookID) throws Exception {
 		String requestBookHtmlURL = BOOK_URL + "/" + bookID + "/html"
 				+ "?access_token=" + access_token + "&page_number=" + page_num;
+		Log.d(TAG, "ACCESS_TOKEN: "+access_token);
 		HttpGet getBookHtml = new HttpGet(requestBookHtmlURL);
 		HttpResponse response = mHttpClient.execute(getBookHtml);
 		if (response != null) {
@@ -269,38 +271,37 @@ public class tdHttpClient {
 
 		URL url = new URL(USER_URL + "/" + uid + "/library" + "?access_token="
 				+ access_token + "&book_id=" + bookID);
+		String uri = url.toString();
 		HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
-		httpCon.setRequestMethod("DELETE");
-		httpCon.connect();
-		InputStream inputStream = httpCon.getInputStream();
-		String responseStr = inputStreamToString(inputStream);
-
-		if (responseStr != null) {
-			if (responseStr.contains(SUCCESS_CODE)) {
-				Log.i(TAG, "DELETE USER BOOK SUCCEED");
-				Log.d(TAG, responseStr);
-				return true;
-			}// unauthorized
-			else {
-				Log.w(TAG, "DELETE USER BOOK FAILED");
-				Log.d(TAG, responseStr);
-				return false;
-			}
+		HttpDelete hd = new HttpDelete(uri);
+		// httpCon.setRequestMethod("DELETE");
+		// httpCon.connect();
+		// InputStream inputStream = httpCon.getInputStream();
+		// String responseStr = inputStreamToString(inputStream);
+		int responseCode = mHttpClient.execute(hd).getStatusLine()
+				.getStatusCode();
+		if (responseCode == 200) {
+			Log.i(TAG, "DELETE USER BOOK SUCCEED");
+			return true;
+		}// unauthorized
+		else {
+			Log.w(TAG, "DELETE USER BOOK FAILED");
+			Log.d(TAG, "code:" + responseCode);
+			return false;
 		}
-		return false;
 	}
 
 	public boolean addUserBook(String bookID, String access_token, String uid)
 			throws Exception {
-		String bookDeletionUrl = USER_URL + "/" + uid + "/library";
+		String bookAddUrl = USER_URL + "/" + uid + "/library";
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
 		nameValuePairs
 				.add(new BasicNameValuePair("access_token", access_token));
 		nameValuePairs.add(new BasicNameValuePair("book_id", bookID));
-		HttpPost deleteBookPost = new HttpPost(bookDeletionUrl);
-		deleteBookPost.setEntity(new UrlEncodedFormEntity(nameValuePairs,
+		HttpPost addBookPost = new HttpPost(bookAddUrl);
+		addBookPost.setEntity(new UrlEncodedFormEntity(nameValuePairs,
 				HTTP.UTF_8));
-		HttpResponse response = mHttpClient.execute(deleteBookPost);
+		HttpResponse response = mHttpClient.execute(addBookPost);
 
 		if (response != null) {
 			HttpEntity entity = response.getEntity();
@@ -310,11 +311,11 @@ public class tdHttpClient {
 			// Log.i(TAG, content);
 			// is logged in
 			if (content.contains(SUCCESS_CODE)) {
-				Log.i(TAG, "BOOK DELETION SUCCEED");
+				Log.i(TAG, "BOOK ADD SUCCEED");
 				return true;
 			}// unauthorized
 			else {
-				Log.w(TAG, "BOOK DELETION FAILED");
+				Log.w(TAG, "BOOK ADD FAILED");
 				return false;
 			}
 		}

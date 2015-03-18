@@ -1,7 +1,6 @@
 // Namespace
 var annotation = {};
 
-
 (function(d){function u(g,a){var b=typeof g[a];return"function"==b||!("object"!=b||!g[a])||"unknown"==b}function w(g,a){return!("object"!=typeof g[a]||!g[a])}function t(g,a){return"undefined"!=typeof g[a]}function x(g){return function(a,b){for(var c=b.length;c--;)if(!g(a,b[c]))return!1;return!0}}function D(g){return g&&f(g,h)&&m(g,a)}function y(g){return w(g,"body")?g.body:g.getElementsByTagName("body")[0]}function z(g){w(window,"console")&&u(window.console,"log")&&window.console.log(g)}function v(a){g.initialized=
 !0;g.supported=!1;a="Rangy is not supported on this page in your browser. Reason: "+a;g.config.alertOnFail?window.alert(a):z(a)}function A(){if(!g.initialized){var a,h=!1,d=!1;u(document,"createRange")&&(a=document.createRange(),f(a,c)&&m(a,b)&&(h=!0),a.detach());if((a=y(document))&&"body"==a.nodeName.toLowerCase())if(a&&u(a,"createTextRange")&&(a=a.createTextRange(),D(a)&&(d=!0)),h||d){g.initialized=!0;g.features={implementsDomRange:h,implementsTextRange:d};var p,I;for(I in E)(p=E[I])instanceof C&&
 p.init(p,g);d=0;for(p=R.length;d<p;++d)try{R[d](g)}catch(O){h="Rangy init listener threw an exception. Continuing. Detail: "+(O.message||O.description||String(O)),z(h)}}else v("Neither Range nor TextRange are available");else v("No body element found")}}function C(a,g,b){this.name=a;this.dependencies=g;this.supported=this.initialized=!1;this.initializer=b}function r(a,b,c,f){a=new C(b,c,function(a){if(!a.initialized){a.initialized=!0;try{f(g,a),a.supported=!0}catch(c){z("Module '"+b+"' failed to load: "+
@@ -181,16 +180,25 @@ c)})}});
 
 
 
-
 var highlighter;
+
 window.onload = function () {
+    console.log("window on load");
 	rangy.init();
 	highlighter = rangy.createHighlighter();
+    if (typeof highligher == 'undefined'){
+        console.log("highlighter is undefined after rangy.createHighlighter!");
+    }
 	highlighter.addClassApplier(rangy.createClassApplier("highlight", {ingoreWhiteSpace:true,elementTagname: "span"}));
+    console.log("window on load finished");
 }
 
 annotation.highlight_selected_text = function()
 {
+    console.log("calling highlight selected text");
+    if (typeof highligher == 'undefined'){
+        console.log("highlighter is undefined!");
+    }
 	var highlight = highlighter.highlightSelection("highlight")[0];
     // create a json object containing highlight information
     var highlightJSON = {};
