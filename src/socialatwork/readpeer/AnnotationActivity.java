@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 import org.json.JSONObject;
 
+import socialatwork.readpeer.Util.StringFormalizer;
 import socialatwork.readpeer.WebRelatedComponents.tdHttpClient;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -88,9 +89,11 @@ public class AnnotationActivity extends FragmentActivity {
 	private static String mediaType;
 	private static int pageNum;
 
+	private StringFormalizer sf;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		
+
 		super.onCreate(savedInstanceState);
 		// Hide the window title
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -100,7 +103,9 @@ public class AnnotationActivity extends FragmentActivity {
 		getWindow().setSoftInputMode(
 				WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 		setContentView(R.layout.activity_annotation);
-        // get user information from bundle 
+		sf = new StringFormalizer();
+
+		// get user information from bundle
 		Bundle extra = getIntent().getExtras();
 		bid = extra.getString("bid");
 		Log.d(TAG, "book id: " + bid);
@@ -118,6 +123,9 @@ public class AnnotationActivity extends FragmentActivity {
 		Log.d(TAG, "end: " + annotationEndIndex);
 
 		selectedText = extra.getString("highlight");
+
+		/* Deal with highlight text formalization: length must be 256 */
+		selectedText = sf.formalize(selectedText);
 		Log.d(TAG, "text: " + selectedText);
 
 		pageNum = extra.getInt("page");
@@ -139,13 +147,13 @@ public class AnnotationActivity extends FragmentActivity {
 				optionsDialog.show();
 			}
 
-			// initialize option dialog which allow user choose to 
+			// initialize option dialog which allow user choose to
 			// upload from album or take picture
 			private void initializeDialogItems(final Dialog optionsDialog) {
 
 				final TextView tv_from_album = (TextView) optionsDialog
 						.findViewById(R.id.text_from_album);
-				
+
 				tv_from_album.setOnTouchListener(new OnTouchListener() {
 
 					@Override
@@ -188,7 +196,7 @@ public class AnnotationActivity extends FragmentActivity {
 							if (e.getAction() == MotionEvent.ACTION_DOWN) {
 								tv_take_picture.setBackgroundColor(0xFFD3D3D3);
 								return true;
-							} 
+							}
 							// open camera when user choose take photo option
 							else if (e.getAction() == MotionEvent.ACTION_UP) {
 								tv_take_picture.setBackgroundColor(0xFF32CD32);
@@ -239,103 +247,72 @@ public class AnnotationActivity extends FragmentActivity {
 		// // updatePreviews(PREVIEW_LINK,null);
 		// }
 		// });
-		
+
 		/*
-
-		linkButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Dialog attachLinkDialog = new Dialog(getWindow().getDecorView()
-						.getContext());
-				attachLinkDialog.setContentView(R.layout.link_attach_dialog);
-				attachLinkDialog.setTitle("Attach links");
-				attachLinkDialog.setCanceledOnTouchOutside(true);
-				attachLinkDialog.show();
-			}
-		});
-
-		final ImageButton videoButton = (ImageButton) findViewById(R.id.btn_video);
-		videoButton.setVisibility(View.INVISIBLE);
-		videoButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				// if the device has no camera, disable this function
-				Dialog videoOptionsDialog = new Dialog(getWindow()
-						.getDecorView().getContext());
-				videoOptionsDialog
-						.setContentView(R.layout.video_upload_option_dialog);
-				videoOptionsDialog.setTitle("Attach video");
-				videoOptionsDialog.setCanceledOnTouchOutside(true);
-				initializeDialogItems(videoOptionsDialog);
-				videoOptionsDialog.show();
-			}
-
-			private void initializeDialogItems(final Dialog optionsDialog) {
-
-				final TextView tv_from_gallery = (TextView) optionsDialog
-						.findViewById(R.id.text_from_gallery);
-				tv_from_gallery.setOnTouchListener(new OnTouchListener() {
-
-					@Override
-					public boolean onTouch(View v, MotionEvent e) {
-						if (e.getAction() == MotionEvent.ACTION_DOWN) {
-							tv_from_gallery.setBackgroundColor(0xFFD3D3D3);
-							return true;
-						} else if (e.getAction() == MotionEvent.ACTION_UP) {
-							tv_from_gallery.setBackgroundColor(0xFF32CD32);
-							optionsDialog.dismiss();
-							Intent openGalleryIntent = new Intent();
-							openGalleryIntent
-									.setAction(Intent.ACTION_GET_CONTENT);
-							openGalleryIntent.setType("video/*");
-							startActivityForResult(openGalleryIntent,
-									REQUEST_GALLERY_VIDEO);
-							return true;
-						}
-						return false;
-					}
-				});
-
-				final TextView tv_record_video = (TextView) optionsDialog
-						.findViewById(R.id.text_record_video);
-				// Disable click if device has no camera
-				PackageManager pm = getPackageManager();
-				boolean hasCamera = pm
-						.hasSystemFeature(PackageManager.FEATURE_CAMERA)
-						|| pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT)
-						|| (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD && Camera
-								.getNumberOfCameras() > 0);
-				if (!hasCamera) {
-					tv_record_video.setClickable(false);
-					tv_record_video.setBackgroundColor(0xFFBEBEBE);
-				} else {
-					tv_record_video.setOnTouchListener(new OnTouchListener() {
-
-						@Override
-						public boolean onTouch(View v, MotionEvent e) {
-							if (e.getAction() == MotionEvent.ACTION_DOWN) {
-								tv_record_video.setBackgroundColor(0xFFD3D3D3);
-								return true;
-							} else if (e.getAction() == MotionEvent.ACTION_UP) {
-								tv_record_video.setBackgroundColor(0xFF32CD32);
-								optionsDialog.dismiss();
-								Intent takeVideoIntent = new Intent(
-										MediaStore.ACTION_VIDEO_CAPTURE);
-								if (takeVideoIntent
-										.resolveActivity(getPackageManager()) != null) {
-									startActivityForResult(takeVideoIntent,
-											REQUEST_TAKE_VIDEO);
-								}
-								return true;
-							}
-							return false;
-						}
-					});
-				}
-			}
-		});
-		*/
+		 * 
+		 * linkButton.setOnClickListener(new View.OnClickListener() {
+		 * 
+		 * @Override public void onClick(View v) { Dialog attachLinkDialog = new
+		 * Dialog(getWindow().getDecorView() .getContext());
+		 * attachLinkDialog.setContentView(R.layout.link_attach_dialog);
+		 * attachLinkDialog.setTitle("Attach links");
+		 * attachLinkDialog.setCanceledOnTouchOutside(true);
+		 * attachLinkDialog.show(); } });
+		 * 
+		 * final ImageButton videoButton = (ImageButton)
+		 * findViewById(R.id.btn_video);
+		 * videoButton.setVisibility(View.INVISIBLE);
+		 * videoButton.setOnClickListener(new View.OnClickListener() {
+		 * 
+		 * @Override public void onClick(View v) { // TODO Auto-generated method
+		 * stub // if the device has no camera, disable this function Dialog
+		 * videoOptionsDialog = new Dialog(getWindow()
+		 * .getDecorView().getContext()); videoOptionsDialog
+		 * .setContentView(R.layout.video_upload_option_dialog);
+		 * videoOptionsDialog.setTitle("Attach video");
+		 * videoOptionsDialog.setCanceledOnTouchOutside(true);
+		 * initializeDialogItems(videoOptionsDialog); videoOptionsDialog.show();
+		 * }
+		 * 
+		 * private void initializeDialogItems(final Dialog optionsDialog) {
+		 * 
+		 * final TextView tv_from_gallery = (TextView) optionsDialog
+		 * .findViewById(R.id.text_from_gallery);
+		 * tv_from_gallery.setOnTouchListener(new OnTouchListener() {
+		 * 
+		 * @Override public boolean onTouch(View v, MotionEvent e) { if
+		 * (e.getAction() == MotionEvent.ACTION_DOWN) {
+		 * tv_from_gallery.setBackgroundColor(0xFFD3D3D3); return true; } else
+		 * if (e.getAction() == MotionEvent.ACTION_UP) {
+		 * tv_from_gallery.setBackgroundColor(0xFF32CD32);
+		 * optionsDialog.dismiss(); Intent openGalleryIntent = new Intent();
+		 * openGalleryIntent .setAction(Intent.ACTION_GET_CONTENT);
+		 * openGalleryIntent.setType("video/*");
+		 * startActivityForResult(openGalleryIntent, REQUEST_GALLERY_VIDEO);
+		 * return true; } return false; } });
+		 * 
+		 * final TextView tv_record_video = (TextView) optionsDialog
+		 * .findViewById(R.id.text_record_video); // Disable click if device has
+		 * no camera PackageManager pm = getPackageManager(); boolean hasCamera
+		 * = pm .hasSystemFeature(PackageManager.FEATURE_CAMERA) ||
+		 * pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT) ||
+		 * (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD && Camera
+		 * .getNumberOfCameras() > 0); if (!hasCamera) {
+		 * tv_record_video.setClickable(false);
+		 * tv_record_video.setBackgroundColor(0xFFBEBEBE); } else {
+		 * tv_record_video.setOnTouchListener(new OnTouchListener() {
+		 * 
+		 * @Override public boolean onTouch(View v, MotionEvent e) { if
+		 * (e.getAction() == MotionEvent.ACTION_DOWN) {
+		 * tv_record_video.setBackgroundColor(0xFFD3D3D3); return true; } else
+		 * if (e.getAction() == MotionEvent.ACTION_UP) {
+		 * tv_record_video.setBackgroundColor(0xFF32CD32);
+		 * optionsDialog.dismiss(); Intent takeVideoIntent = new Intent(
+		 * MediaStore.ACTION_VIDEO_CAPTURE); if (takeVideoIntent
+		 * .resolveActivity(getPackageManager()) != null) {
+		 * startActivityForResult(takeVideoIntent, REQUEST_TAKE_VIDEO); } return
+		 * true; } return false; } }); } } });
+		 */
 
 		Button submitBtn = (Button) findViewById(R.id.btn_submit);
 		submitBtn.setOnClickListener(new View.OnClickListener() {
@@ -365,7 +342,7 @@ public class AnnotationActivity extends FragmentActivity {
 				finish();
 			}
 		});
-        // edit text for user to put in annotation comment 
+		// edit text for user to put in annotation comment
 		EditText annotationCommentET = (EditText) findViewById(R.id.annotation_comment_textview);
 		annotationCommentET.setSelection(0);
 		annotationCommentET.setScroller(new Scroller(this));
@@ -410,7 +387,7 @@ public class AnnotationActivity extends FragmentActivity {
 		String commentEmptyTester = m.replaceAll("");
 		Log.i(TAG, "tester size:" + commentEmptyTester.length());
 		boolean isSubmissionSuccessful = false;
-        // Disallow empty comment
+		// Disallow empty comment
 		if (!commentEmptyTester.isEmpty()) {
 			Log.i(TAG, "comment is:" + comment);
 			Log.i(TAG, "comment length:" + comment.length());
@@ -424,7 +401,7 @@ public class AnnotationActivity extends FragmentActivity {
 								Integer.toString(pageNum), Integer.toString(0),
 								annotationStartIndex, annotationEndIndex,
 								selectedText);
-			} 
+			}
 			// annotation with media attachment
 			else {
 				if (mediaType != null) {
@@ -447,7 +424,8 @@ public class AnnotationActivity extends FragmentActivity {
 						String returnedInformation = mHttpClient.uploadFile(
 								access_token, uid, mediaType,
 								mediaFileToBeUpload);
-						//Log.i(TAG, "returnedInformation:" + returnedInformation);
+						// Log.i(TAG, "returnedInformation:" +
+						// returnedInformation);
 						JSONObject returnedInfo = new JSONObject(
 								returnedInformation);
 						JSONObject fileInfo = (JSONObject) returnedInfo
@@ -464,7 +442,7 @@ public class AnnotationActivity extends FragmentActivity {
 					}
 				}
 			}
-		} 
+		}
 		// Alert user when comment is empty
 		else {
 			Log.i(TAG, "comment is null");
@@ -478,7 +456,7 @@ public class AnnotationActivity extends FragmentActivity {
 				}
 			});
 		}
-		// Notify handler to handle submissions 
+		// Notify handler to handle submissions
 		if (isSubmissionSuccessful) {
 			submitHandler.sendEmptyMessage(SUBMIT_SUCCESSFUL);
 		} else {
@@ -488,7 +466,7 @@ public class AnnotationActivity extends FragmentActivity {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		
+
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode != Activity.RESULT_OK) {
 			Log.w(TAG, "result is not OK !");
@@ -648,7 +626,8 @@ public class AnnotationActivity extends FragmentActivity {
 		return bitmap;
 	}
 
-	// Display preview image or audio preview according to the type of annotation
+	// Display preview image or audio preview according to the type of
+	// annotation
 	private void updatePreviews(int previewCase, final String resourceReference) {
 
 		ImageButton audioButton = (ImageButton) findViewById(R.id.btn_play);
