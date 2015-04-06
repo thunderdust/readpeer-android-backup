@@ -1,4 +1,4 @@
-package socialatwork.readpeer;
+package socialatwork.readpeer.Cache;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,6 +12,8 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import socialatwork.readpeer.R;
+import socialatwork.readpeer.R.drawable;
 import socialatwork.readpeer.WebRelatedComponents.onlinePictureDownloader;
 import android.content.Context;
 import android.content.SharedPreferences;

@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import socialatwork.readpeer.Cache.ImageLoader;
+import socialatwork.readpeer.Cache.tdCacheManager;
 import socialatwork.readpeer.WebRelatedComponents.tdHttpClient;
 import android.content.Context;
 import android.graphics.drawable.Drawable;

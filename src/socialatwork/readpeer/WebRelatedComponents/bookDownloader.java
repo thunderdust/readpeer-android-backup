@@ -54,7 +54,6 @@ public class bookDownloader {
 					bookBodyAll.getString(Integer.toString(i + 1)));
 			bookContent[i] = singlePageObject.getString("text");
 			bookContent[i] = htmlParser.parseHtmlString(bookContent[i]);
-			bookContent[i] = PDFParser.parsePDFString(bookContent[i]);
 			bookContentWhole.append(bookContent[i]);
 			if (i > 0) {
 				pageWordCount[i] = pageWordCount[i - 1]

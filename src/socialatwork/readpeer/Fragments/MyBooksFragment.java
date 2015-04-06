@@ -482,8 +482,7 @@ public class MyBooksFragment extends Fragment {
 					android.os.Environment.MEDIA_MOUNTED)) {
 				String storagePath = Environment.getExternalStorageDirectory()
 						.getPath() + "/Readpeer/Books/";
-				String bookPath = storagePath + bookName + "-" + bookID + "-"
-						+ ".txt";
+				String bookPath = storagePath + bookID + "-" + bookName;
 				File bookFile = new File(bookPath);
 				boolean isDeleted = bookFile.delete();
 				return isDeleted;

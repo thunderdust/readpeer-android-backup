@@ -9,6 +9,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import socialatwork.readpeer.Cache.tdCacheManager;
 import socialatwork.readpeer.WebRelatedComponents.tdHttpClient;
 import android.app.Dialog;
 import android.content.Context;

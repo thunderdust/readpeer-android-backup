@@ -17,7 +17,7 @@ import socialatwork.readpeer.AnnotationImageViewActivity;
 import socialatwork.readpeer.AnnotationVideoViewActivity;
 import socialatwork.readpeer.ImageNameGenerator;
 import socialatwork.readpeer.R;
-import socialatwork.readpeer.tdCacheManager;
+import socialatwork.readpeer.Cache.tdCacheManager;
 import socialatwork.readpeer.WebRelatedComponents.tdHttpClient;
 import android.app.Activity;
 import android.app.Dialog;

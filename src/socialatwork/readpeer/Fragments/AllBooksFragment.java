@@ -11,8 +11,8 @@ import org.json.JSONObject;
 import socialatwork.readpeer.ImageNameGenerator;
 import socialatwork.readpeer.R;
 import socialatwork.readpeer.ReadBookActivity;
-import socialatwork.readpeer.tdCacheManager;
 import socialatwork.readpeer.Cache.ImageLoader;
+import socialatwork.readpeer.Cache.tdCacheManager;
 import socialatwork.readpeer.WebRelatedComponents.ReturnedContentHandler;
 import socialatwork.readpeer.WebRelatedComponents.bookDownloader;
 import socialatwork.readpeer.WebRelatedComponents.bookHtmlDownloader;
@@ -70,7 +70,7 @@ public class AllBooksFragment extends Fragment {
 
 	// Handlers messages
 	private int PICTURE_DOWNLOAD_COMPLETED_MESSAGE = 0;
-	//private final int GET_BOOK_DONE = 1;
+	// private final int GET_BOOK_DONE = 1;
 	private final int BOOK_DOWNLOAD_FINISHED = 2;
 	private final int GET_BOOK_INFO_DONE = 3;
 	private final int LOADING_DIALOG_TIME_OUT = 4;
@@ -95,7 +95,6 @@ public class AllBooksFragment extends Fragment {
 	private final float BOOK_TITLE_FONT_SIZE_SMALL = 10;
 	private final long DEFINED_WAITING_TIME = 800L;
 
-	private ImageNameGenerator mGenerator;
 	private ShelfAdapter mAdapter;
 	private tdCacheManager mCacheManager;
 
@@ -125,7 +124,8 @@ public class AllBooksFragment extends Fragment {
 		@Override
 		public void handleMessage(Message msg) {
 
-			if (msg.what == PICTURE_DOWNLOAD_COMPLETED_MESSAGE||msg.what == PICTURE_DOWNLOAD_COMPLETED_MESSAGE) {
+			if (msg.what == PICTURE_DOWNLOAD_COMPLETED_MESSAGE
+					|| msg.what == PICTURE_DOWNLOAD_COMPLETED_MESSAGE) {
 				Log.d(TAG,
 						"cover images are downloaded, now can load from local cache");
 				/* Must load required data before set adapter, very important! */
@@ -134,16 +134,16 @@ public class AllBooksFragment extends Fragment {
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
-				if (loadingDialog!=null&&loadingDialog.isShowing()){
+				if (loadingDialog != null && loadingDialog.isShowing()) {
 					loadingDialog.dismiss();
 				}
-				Log.d(TAG,"setting up grid view adapter");
+				Log.d(TAG, "setting up grid view adapter");
 				mAdapter = new ShelfAdapter(getActivity(), bookCoverURLs);
 				bookShelf.setAdapter(mAdapter);
-				
-				//Message getCoverDoneMsg = new Message();
-				//getCoverDoneMsg.what = GET_BOOK_DONE;
-				//this.sendMessage(getCoverDoneMsg);
+
+				// Message getCoverDoneMsg = new Message();
+				// getCoverDoneMsg.what = GET_BOOK_DONE;
+				// this.sendMessage(getCoverDoneMsg);
 			}
 
 			else if (msg.what == BOOK_DOWNLOAD_FINISHED) {
@@ -204,7 +204,6 @@ public class AllBooksFragment extends Fragment {
 
 		mHttpClient = tdHttpClient.getClientInstance();
 		mContentHandler = ReturnedContentHandler.getHandlerInstance();
-		mGenerator = ImageNameGenerator.getInstance();
 		mCacheManager = tdCacheManager.getCacheManagerInstance(getActivity());
 
 		try {
@@ -536,23 +535,6 @@ public class AllBooksFragment extends Fragment {
 		}
 	}
 
-	/*
-	 * class downloadBookRunnable implements Runnable {
-	 * 
-	 * @Override public void run() { try {
-	 * 
-	 * //String html = mHttpClient.getBookHtmlByPage(access_token,
-	 * "1",selectedBookID); //Log.d(TAG,"html:"+html);
-	 * 
-	 * mBookDownloader.downloadBook(getActivity() .getApplicationContext(), uid,
-	 * selectedBookID, access_token, selectedBookTitle); // updates local book
-	 * list after download loadLocalBookIndex(); Message m = new Message();
-	 * m.what = BOOK_DOWNLOAD_FINISHED; bookDataHandler.sendMessage(m);
-	 * 
-	 * } catch (JSONException e) { e.printStackTrace(); } catch (Exception e) {
-	 * e.printStackTrace(); } } }
-	 */
-
 	class ViewHolder {
 		TextView mTextView;
 		ImageView mImageView;
@@ -563,7 +545,6 @@ public class AllBooksFragment extends Fragment {
 		private Context context;
 		private ArrayList<URL> bookCoverURLs;
 		private int itemCount;
-		private ImageLoader mImageLoader;
 		private boolean mBusy = false;
 
 		public ShelfAdapter(Context context, ArrayList<URL> bookCoverURLs) {
@@ -571,7 +552,6 @@ public class AllBooksFragment extends Fragment {
 			// Plus 1 for last item "load more"
 			this.bookCoverURLs = bookCoverURLs;
 			this.itemCount = bookCoverURLs.size() + 1;
-			mImageLoader = new ImageLoader(context);
 		}
 
 		public void setFlagBusy(boolean isBusy) {
@@ -633,20 +613,6 @@ public class AllBooksFragment extends Fragment {
 						mViewHolder.mImageView
 								.setBackgroundResource(R.drawable.default_cover);
 					}
-
-					/*
-					 * String url = bookCoverURLs.get( position %
-					 * bookCoverURLs.size()).toString(); Log.d(TAG,
-					 * "book cover url:" + url); // Set default book image if
-					 * (mViewHolder.mImageView != null) {
-					 * 
-					 * mViewHolder.mImageView
-					 * .setImageResource(R.drawable.default_cover); } else {
-					 * Log.e(TAG, "book cover image view is NULL"); } if (url !=
-					 * null) { if (!mBusy) { mImageLoader.DisplayImage(url,
-					 * mViewHolder.mImageView, false); } } else { Log.e(TAG,
-					 * "url of cover is NULL at:" + position); }
-					 */
 
 				}
 				// Last item, load page button
@@ -726,7 +692,7 @@ public class AllBooksFragment extends Fragment {
 	// load book covers from cache
 	private void getBookCovers() throws JSONException {
 
-		Log.d(TAG,"getting book covers from local cache");
+		Log.d(TAG, "getting book covers from local cache");
 		bookCovers = new ArrayList<Drawable>();
 		String rootPath = Environment.getExternalStorageDirectory().getPath();
 		String applicationFolderPath = rootPath + "/Readpeer";
@@ -736,13 +702,14 @@ public class AllBooksFragment extends Fragment {
 			JSONObject book = bookInfoJSONObjects.get(i);
 			String bookCoverImagePath = cacheFilePath
 					+ book.getString("bid").toString() + "-cover.jpg";
-			Drawable bookCoverDrawable = Drawable.createFromPath(bookCoverImagePath);
-			if (bookCoverDrawable!=null){
-				Log.d(TAG,"Adding cover drawable");
+			Drawable bookCoverDrawable = Drawable
+					.createFromPath(bookCoverImagePath);
+			if (bookCoverDrawable != null) {
+				Log.d(TAG, "Adding cover drawable");
 				bookCovers.add(Drawable.createFromPath(bookCoverImagePath));
-			}
-			else {
-				Log.e(TAG,"Book cover drawable created from local path is null");
+			} else {
+				Log.e(TAG,
+						"Book cover drawable created from local path is null");
 				bookCovers.add(null);
 			}
 		}
