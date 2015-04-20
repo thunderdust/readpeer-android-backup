@@ -32,7 +32,7 @@ public class bookHtmlDownloader {
 	private String[] bookHtmlPages;
 	private int pageCount;
 	private StringBuffer bookContentWhole;
-	private final String SCRIPT_ANNOTATION = "<script type=\"text/javascript\" src=\"annotation.js\"></script>";
+	private final String SCRIPT_ANNOTATION = "<script type=\"text/javascript\" src=\"file:///android_asset/annotation.js\"></script>";
 
 	/* Script reference and meta information */
 
@@ -112,7 +112,7 @@ public class bookHtmlDownloader {
 		String part1 = "";
 		String part2 = "";
 
-		int position = htmlContent.indexOf("<body>");
+		int position = htmlContent.indexOf("<head>");
 		if (position == -1) {
 			Log.e(TAG, "cannot find head tag");
 		} else {
