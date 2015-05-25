@@ -74,6 +74,11 @@
             android:screenOrientation="portrait" >
         </activity>
         <activity
+            android:name="socialatwork.readpeer.BookStoreActivity"
+            android:label="Book Store"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
             android:name="socialatwork.readpeer.AnnotationImageViewActivity"
             android:screenOrientation="portrait" >
         </activity>

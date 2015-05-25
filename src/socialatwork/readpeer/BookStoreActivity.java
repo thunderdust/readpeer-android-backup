@@ -2,8 +2,7 @@ package socialatwork.readpeer;
 
 import java.io.IOException;
 import java.util.ArrayList;
-
-import socialatwork.readpeer.Fragments.MyBooksFragment;
+import socialatwork.readpeer.Fragments.AllBooksFragment;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -23,13 +22,13 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
-public class BookShelfActivity extends FragmentActivity {
+public class BookStoreActivity extends FragmentActivity {
 
 	private static String site_username;
 	private static String avatar_url_link;
@@ -37,8 +36,7 @@ public class BookShelfActivity extends FragmentActivity {
 	private static String access_token;
 	private static final String TAG = "bookshelf";
 
-	// private AllBooksFragment mAllBooksFragment;
-	private MyBooksFragment mMyBooksFragment;
+	private AllBooksFragment mAllBooksFragment;
 
 	private Dialog accountMenuDialog;
 	private Dialog functionMenuDialog;
@@ -85,12 +83,12 @@ public class BookShelfActivity extends FragmentActivity {
 
 			private void initialzeFunctionMenu() {
 
-				functionMenuDialog = new Dialog(BookShelfActivity.this,
+				functionMenuDialog = new Dialog(BookStoreActivity.this,
 						R.style.dialog_account);
 				functionMenuDialog
 						.requestWindowFeature(Window.FEATURE_NO_TITLE);
 				functionMenuDialog
-						.setContentView(R.layout.dialog_function_menu);
+						.setContentView(R.layout.dialog_function_menu2);
 				functionMenuDialog.setCanceledOnTouchOutside(true);
 				Window mWindow = functionMenuDialog.getWindow();
 				WindowManager.LayoutParams lp = mWindow.getAttributes();
@@ -98,27 +96,27 @@ public class BookShelfActivity extends FragmentActivity {
 				mWindow.setAttributes(lp);
 				mWindow.setGravity(Gravity.START | Gravity.TOP);
 
-				Button bookStoreButton = (Button) functionMenuDialog
-						.findViewById(R.id.btn_bookstore);
-				bookStoreButton.setText("Book Store");
+				Button myBooksButton = (Button) functionMenuDialog
+						.findViewById(R.id.btn_bookshelf);
+				myBooksButton.setText("Book Shelf");
 				Drawable bookStoreIcon = getResources().getDrawable(
-						R.drawable.icon_bookstore);
-				bookStoreButton.setCompoundDrawablesWithIntrinsicBounds(
+						R.drawable.icon_bookshelf);
+				myBooksButton.setCompoundDrawablesWithIntrinsicBounds(
 						bookStoreIcon, null, null, null);
 
-				bookStoreButton.setOnClickListener(new OnClickListener() {
+				myBooksButton.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
 
-						Intent toBookStoreActivity = new Intent(
-								BookShelfActivity.this, BookStoreActivity.class);
-						toBookStoreActivity.putExtra("access_token",
+						Intent toBookShelfActivity = new Intent(
+								BookStoreActivity.this, BookShelfActivity.class);
+						toBookShelfActivity.putExtra("access_token",
 								access_token);
-						toBookStoreActivity.putExtra("uid", uid);
-						toBookStoreActivity.putExtra("username", site_username);
-						toBookStoreActivity.putExtra("avatar_url",
+						toBookShelfActivity.putExtra("uid", uid);
+						toBookShelfActivity.putExtra("username", site_username);
+						toBookShelfActivity.putExtra("avatar_url",
 								avatar_url_link);
-						startActivity(toBookStoreActivity);
+						startActivity(toBookShelfActivity);
 						// finish current activity
 						finish();
 					}
@@ -167,7 +165,7 @@ public class BookShelfActivity extends FragmentActivity {
 
 			private void startMenuDialog() {
 
-				accountMenuDialog = new Dialog(BookShelfActivity.this,
+				accountMenuDialog = new Dialog(BookStoreActivity.this,
 						R.style.dialog_account);
 				accountMenuDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 				accountMenuDialog.setContentView(R.layout.dialog_account_menu);
@@ -201,7 +199,7 @@ public class BookShelfActivity extends FragmentActivity {
 					@Override
 					public void onClick(View v) {
 						final Intent toProfile = new Intent(
-								BookShelfActivity.this, ProfileActivity.class);
+								BookStoreActivity.this, ProfileActivity.class);
 						toProfile.putExtra("access_token", access_token);
 						toProfile.putExtra("uid", uid);
 						toProfile.putExtra("avatar_url", avatar_url_link);
@@ -222,7 +220,7 @@ public class BookShelfActivity extends FragmentActivity {
 
 					@Override
 					public void onClick(View v) {
-						Intent toNewsFeed = new Intent(BookShelfActivity.this,
+						Intent toNewsFeed = new Intent(BookStoreActivity.this,
 								NewsFeedActivity.class);
 						toNewsFeed.putExtra("access_token", access_token);
 						toNewsFeed.putExtra("uid", uid);
@@ -242,7 +240,7 @@ public class BookShelfActivity extends FragmentActivity {
 
 					@Override
 					public void onClick(View v) {
-						Intent toLogIn = new Intent(BookShelfActivity.this,
+						Intent toLogIn = new Intent(BookStoreActivity.this,
 								LogInActivity.class);
 						toLogIn.putExtra("isAutoLoginCanceled", true);
 						accountMenuDialog.dismiss();
@@ -256,18 +254,16 @@ public class BookShelfActivity extends FragmentActivity {
 		});
 
 		title = (EditText) findViewById(R.id.EditText_bookshelf_name);
-		title.setText(R.string.title_myBook);
+		title.setText(R.string.title_allBook);
 		title.setFocusable(false);
 		title.setClickable(false);
 	}
 
 	private void initFragments() {
-		// TODO Auto-generated method stub
-		mMyBooksFragment = MyBooksFragment.newInstance();
-		// mAllBooksFragment = AllBooksFragment.newInstance();
+
+		mAllBooksFragment = AllBooksFragment.newInstance();
 		fragments = new ArrayList<Fragment>();
-		fragments.add(mMyBooksFragment);
-		// fragments.add(mAllBooksFragment);
+		fragments.add(mAllBooksFragment);
 	}
 
 	private void initViewPager() {
@@ -285,13 +281,10 @@ public class BookShelfActivity extends FragmentActivity {
 
 				switch (position) {
 				case 0:
-					title.setText(R.string.title_myBook);
-					break;
-				case 1:
 					title.setText(R.string.title_allBook);
 					break;
 				default:
-					title.setText(R.string.title_myBook);
+					title.setText(R.string.title_allBook);
 					break;
 				}
 			}
@@ -370,13 +363,10 @@ public class BookShelfActivity extends FragmentActivity {
 			String tabLabel = null;
 			switch (position) {
 			case 0:
-				tabLabel = getString(R.string.title_myBook);
-				break;
-			case 1:
 				tabLabel = getString(R.string.title_allBook);
 				break;
 			default:
-				tabLabel = getString(R.string.title_myBook);
+				tabLabel = getString(R.string.title_allBook);
 				break;
 			}
 			return tabLabel;
@@ -401,30 +391,6 @@ public class BookShelfActivity extends FragmentActivity {
 		avatar_url_link = urlParser(avatar_url_link);
 	}
 
-	/*
-	 * private class loadAvatarPictureTask extends AsyncTask<URL, Void, Bitmap>
-	 * {
-	 * 
-	 * URL picURL;
-	 * 
-	 * @Override protected Bitmap doInBackground(URL... urls) { this.picURL =
-	 * urls[0]; Bitmap bm = null; try { HttpURLConnection conn =
-	 * (HttpURLConnection) picURL .openConnection(); conn.setDoInput(true);
-	 * conn.setConnectTimeout(2500); conn.setRequestMethod("GET");
-	 * conn.connect(); InputStream stream = conn.getInputStream(); bm =
-	 * BitmapFactory.decodeStream(stream); stream.close(); conn.disconnect();
-	 * return bm; } catch (Exception e) { e.printStackTrace(); return bm; } }
-	 * 
-	 * protected void onPostExecute(Bitmap bm) { if (bm != null) { Bitmap
-	 * avatarBitmap = Bitmap.createScaledBitmap(bm, 60, 60, true); userAvatar =
-	 * new BitmapDrawable(getResources(), avatarBitmap); } else { Bitmap
-	 * avatarBitmap = BitmapFactory.decodeResource( getResources(),
-	 * R.drawable.default_user_image); userAvatar = new
-	 * BitmapDrawable(getResources(), avatarBitmap); }
-	 * usernameBtn.setCompoundDrawablesWithIntrinsicBounds(userAvatar, null,
-	 * null, null); } }
-	 */
-
 	private String urlParser(String originalURL) {
 		Log.i("profile page", "before parsing:" + originalURL);
 		originalURL = originalURL.replace("\\", "");
@@ -437,7 +403,7 @@ public class BookShelfActivity extends FragmentActivity {
 		bundle.putString("access_token", access_token);
 		bundle.putString("uid", uid);
 		bundle.putString("username", site_username);
-		// mAllBooksFragment.setArguments(bundle);
-		mMyBooksFragment.setArguments(bundle);
+		mAllBooksFragment.setArguments(bundle);
 	}
+
 }

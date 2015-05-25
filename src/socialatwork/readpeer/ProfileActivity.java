@@ -5,6 +5,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.json.JSONObject;
+
 import socialatwork.readpeer.WebRelatedComponents.ReturnedContentHandler;
 import socialatwork.readpeer.WebRelatedComponents.tdHttpClient;
 import android.content.Intent;
@@ -179,15 +181,13 @@ public class ProfileActivity extends FragmentActivity {
 		ImageView avatarIV = (ImageView) findViewById(R.id.imageView_Avatar);
 
 		String content = mHttpClient.getUserContent(token, "profile", uid);
+		// Log.d("profile returned content", content);
+		JSONObject profileObject = new JSONObject(content);
 
-		numOBooks = mContentHandler.getValueFromContentReturned(content,
-				"num_of_books", TYPE_STRING);
-		numOAnnotations = mContentHandler.getValueFromContentReturned(content,
-				"num_of_annotations", TYPE_STRING);
-		numOFollowings = mContentHandler.getValueFromContentReturned(content,
-				"num_of_following", TYPE_STRING);
-		numOFollowers = mContentHandler.getValueFromContentReturned(content,
-				"num_of_follower", TYPE_STRING);
+		numOBooks = profileObject.getString("num_of_books");
+		numOAnnotations = profileObject.getString("num_of_annotations");
+		numOFollowings = profileObject.getString("num_of_following");
+		numOFollowers = profileObject.getString("num_of_follower");
 
 		avatar_url_link = urlParser(avatar_url_link);
 

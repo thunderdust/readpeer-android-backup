@@ -77,8 +77,6 @@ public class AllBooksFragment extends Fragment {
 	private int PICTURE_DOWNLOAD_TIMEOUT_MESSAGE = 408;
 	private final long loading_dialog_time_out_duration = 3000l;
 
-	OnNewBookDownloadedListener mCallback;
-
 	private ArrayList<String> mLocalBookIndexList;
 	private String bookInfoByPage;
 	private ArrayList<String> bookNames;
@@ -109,10 +107,6 @@ public class AllBooksFragment extends Fragment {
 
 	private tdHttpClient mHttpClient;
 	private static ReturnedContentHandler mContentHandler;
-
-	public interface OnNewBookDownloadedListener {
-		public void notifyNewBookDownloaded();
-	}
 
 	/* Ensure adapter setting is after book data loading finish */
 	/*
@@ -152,8 +146,6 @@ public class AllBooksFragment extends Fragment {
 					bookDetailDialog.dismiss();
 					Toast.makeText(getActivity().getApplicationContext(),
 							"Download complete!", Toast.LENGTH_SHORT).show();
-					// Notify bookshelf activity about the new book
-					mCallback.notifyNewBookDownloaded();
 				}
 			}
 
@@ -183,15 +175,6 @@ public class AllBooksFragment extends Fragment {
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-
-		// This makes sure that the container activity has implemented
-		// the callback interface. If not, it throws an exception
-		try {
-			mCallback = (OnNewBookDownloadedListener) activity;
-		} catch (ClassCastException e) {
-			throw new ClassCastException(activity.toString()
-					+ " must implement OnNewBookDownloadedListener");
-		}
 	}
 
 	@Override

@@ -193,6 +193,14 @@ window.onload = function () {
     console.log("window on load finished");
 }
 
+
+annotation.remove_all_highlights = function () {
+    console.log("remove all highlights");
+	highlighter.removeAllHighlights();
+    return "returned content";
+}
+
+
 annotation.highlight_selected_text = function()
 {
     console.log("calling highlight selected text");
@@ -207,15 +215,18 @@ annotation.highlight_selected_text = function()
     highlightJSON['end'] = highlight.characterRange.end;
 	return highlightJSON;
 }
-annotation.remove_all_highlights = function () {
-	highlighter.removeAllHighlights();
-}
+
+
 annotation.highlight_next_annotation = function (start, end, id) {
+    
+    console.log("highlight next annotation");
 	highlighter.removeAllHighlights();
     var serializedHighlights='type:textContent|'+start+'$'+end+'$'+id+'$highlight';
     highlighter.deserialize(serializedHighlights);
 }
+
 annotation.get_body_content = function(start, end) {
+    console.log("highlight next annotation");
 	if (start>=end) {return ""}
 	var node = document.body;
 	var range = rangy.createRange();
